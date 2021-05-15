@@ -1,0 +1,3 @@
+core:
+  state:
+    dbfile: "dummy_state_file"

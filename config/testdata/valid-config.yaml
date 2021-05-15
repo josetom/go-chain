@@ -1,0 +1,5 @@
+node:
+  datadir: "dummy_dir"
+core:
+  state:
+    dbfile: "dummy_state_file"
