@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/josetom/go-chain/core"
@@ -40,8 +39,8 @@ func txAddCmd() *cobra.Command {
 			value, _ := cmd.Flags().GetUint(flagValue)
 			data, _ := cmd.Flags().GetString(flagData)
 
-			fromAcc := core.NewAccount(from)
-			toAcc := core.NewAccount(to)
+			fromAcc := core.NewAddress(from)
+			toAcc := core.NewAddress(to)
 
 			tx := core.NewTransaction(fromAcc, toAcc, value, data)
 
@@ -66,14 +65,14 @@ func txAddCmd() *cobra.Command {
 				log.Fatalln(err)
 			}
 
-			fmt.Println("TX successfully added to the ledger.")
+			log.Println("TX successfully added to the ledger.")
 		},
 	}
 
-	cmd.Flags().String(flagFrom, "", "From what account to send tokens")
+	cmd.Flags().String(flagFrom, "", "From what address to send tokens")
 	cmd.MarkFlagRequired(flagFrom)
 
-	cmd.Flags().String(flagTo, "", "To what account to send tokens")
+	cmd.Flags().String(flagTo, "", "To what address to send tokens")
 	cmd.MarkFlagRequired(flagTo)
 
 	cmd.Flags().Uint(flagValue, 0, "How many tokens to send")

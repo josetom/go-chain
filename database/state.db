@@ -1,2 +1,1 @@
-{"from":"0x0","to":"0x100","value":700,"data":"reward"}
-{"from":"0x100","to":"0x200","value":100,"data":"reward"}
+{"TxnData":{"From":"0x0000000000000000000000000000000000000000","To":"0x3030303030303030303030303030303030313030","Value":100,"Data":"reward"},"TxnHash":"0x2c46899f8df91ce9dcba95cdd63551524f5eba1e825399120a161be19605fe8c","Timestamp":"0001-01-01T00:00:00Z"}

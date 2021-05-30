@@ -5,9 +5,13 @@
 - Genesis
 - Load persisted state
 - Add Transactions
+- Hashing
 - Persist state
-
+    - To a file in json format
 ### Todo
+- Persist state
+    - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
+    - Persist to leveldb
 - Blocks
 - Validate blocks 
 - Mine blocks
@@ -17,8 +21,8 @@
 
 # Development
 ```sh
-go build ./cmd/gbc/...
-./gbc --help
+go build ./cmd/go-chain/...
+./go-chain --help
 ```
 
 # Testing

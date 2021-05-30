@@ -15,9 +15,9 @@ type GenesisConfig struct {
 }
 
 type Genesis struct {
-	Timestamp time.Time        `json: "timestamp"`
-	Config    GenesisConfig    `json: "config"`
-	Balances  map[Account]uint `json: "balances"`
+	Timestamp time.Time       `json: "timestamp"`
+	Config    GenesisConfig   `json: "config"`
+	Balances  map[string]uint `json: "balances"`
 }
 
 var genesisContent *Genesis
