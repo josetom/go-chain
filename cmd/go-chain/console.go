@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/josetom/go-chain/config"
 	"github.com/josetom/go-chain/constants"
@@ -13,6 +13,6 @@ var consoleCmd = &cobra.Command{
 	Short: constants.BlockChainName + " CLI client",
 	Run: func(cmd *cobra.Command, args []string) {
 		config.Load("config.yaml")
-		fmt.Println("Coming soon !")
+		log.Println("Coming soon !")
 	},
 }

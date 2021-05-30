@@ -12,13 +12,13 @@ import (
 )
 
 type State struct {
-	Balances  map[Account]uint
+	Balances  map[Address]uint
 	txMemPool []Transaction
 
 	dbFile *os.File
 }
 
-var state *State = &State{make(map[Account]uint), make([]Transaction, 0), nil}
+var state *State = &State{make(map[Address]uint), make([]Transaction, 0), nil}
 
 func loadStateFromDisk() (*State, error) {
 	txDbPath := filepath.Join(node.Config.DataDir, Config.State.DbFile)
@@ -53,22 +53,22 @@ func LoadState() (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	for account, balance := range genesisContent.Balances {
-		state.Balances[account] = balance
+	for addressHex, balance := range genesisContent.Balances {
+		state.Balances[NewAddress(addressHex)] = balance
 	}
 	return loadStateFromDisk()
 }
 
 func (s *State) apply(tx Transaction) error {
 	if tx.IsReward() {
-		state.Balances[tx.To] += tx.Value
+		state.Balances[tx.To()] += tx.Value()
 		return nil
 	}
-	if s.Balances[tx.From] <= tx.Value {
+	if s.Balances[tx.From()] <= tx.Value() {
 		return fmt.Errorf("insufficient_balance")
 	}
-	s.Balances[tx.From] -= tx.Value
-	s.Balances[tx.To] += tx.Value
+	s.Balances[tx.From()] -= tx.Value()
+	s.Balances[tx.To()] += tx.Value()
 
 	return nil
 }

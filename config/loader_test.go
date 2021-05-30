@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"log"
 	"testing"
 
 	"github.com/josetom/go-chain/core"
@@ -11,11 +11,11 @@ import (
 func TestLoadDefaults(t *testing.T) {
 	config := Load("")
 	if config.Node.DataDir != node.Defaults.DataDir {
-		fmt.Println("config.Node.DataDir -- ", config.Node.DataDir)
+		log.Println("config.Node.DataDir -- ", config.Node.DataDir)
 		t.Fail()
 	}
 	if config.Core.State.DbFile != core.Defaults.State.DbFile {
-		fmt.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
+		log.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
 		t.Fail()
 	}
 	cleanup := func() {
@@ -27,11 +27,11 @@ func TestLoadDefaults(t *testing.T) {
 func TestLoadValidFile(t *testing.T) {
 	config := Load("testdata/valid-config.yaml")
 	if config.Node.DataDir != "dummy_dir" {
-		fmt.Println("config.Node.DataDir -- ", config.Node.DataDir)
+		log.Println("config.Node.DataDir -- ", config.Node.DataDir)
 		t.Fail()
 	}
 	if config.Core.State.DbFile != "dummy_state_file" {
-		fmt.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
+		log.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
 		t.Fail()
 	}
 	cleanup := func() {
@@ -43,11 +43,11 @@ func TestLoadValidFile(t *testing.T) {
 func TestLoadPartialConfig(t *testing.T) {
 	config := Load("testdata/partial-config.yaml")
 	if config.Node.DataDir != node.Defaults.DataDir {
-		fmt.Println("config.Node.DataDir -- ", config.Node.DataDir)
+		log.Println("config.Node.DataDir -- ", config.Node.DataDir)
 		t.Fail()
 	}
 	if config.Core.State.DbFile != "dummy_state_file" {
-		fmt.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
+		log.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
 		t.Fail()
 	}
 	cleanup := func() {

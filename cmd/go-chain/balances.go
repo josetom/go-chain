@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/josetom/go-chain/core"
@@ -34,11 +33,11 @@ var balancesListCmd = &cobra.Command{
 		}
 		defer state.Close()
 
-		fmt.Println("Accounts balances:")
-		fmt.Println("__________________")
-		fmt.Println("")
-		for account, balance := range state.Balances {
-			fmt.Printf("%s: %d", account, balance)
+		log.Println("Address balances:")
+		log.Println("__________________")
+		log.Println("")
+		for address, balance := range state.Balances {
+			log.Printf("%s: %d", address, balance)
 		}
 	},
 }
