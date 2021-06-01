@@ -7,7 +7,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/node"
 )
 
@@ -15,12 +17,12 @@ type State struct {
 	Balances  map[Address]uint
 	txMemPool []Transaction
 
-	dbFile *os.File
+	dbFile          *os.File
+	latestBlockHash common.Hash
+	time            time.Time
 }
 
-var state *State = &State{make(map[Address]uint), make([]Transaction, 0), nil}
-
-func loadStateFromDisk() (*State, error) {
+func (s *State) loadStateFromDisk() (*State, error) {
 	txDbPath := filepath.Join(node.Config.DataDir, Config.State.DbFile)
 	f, err := os.OpenFile(txDbPath, os.O_APPEND|os.O_RDWR, 0600)
 	if err != nil {
@@ -29,7 +31,7 @@ func loadStateFromDisk() (*State, error) {
 	}
 
 	scanner := bufio.NewScanner(f)
-	state.dbFile = f
+	s.dbFile = f
 
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
@@ -37,15 +39,16 @@ func loadStateFromDisk() (*State, error) {
 			return nil, err
 		}
 
-		var tx Transaction
-		json.Unmarshal(scanner.Bytes(), &tx)
+		var blockFS BlockFS
+		json.Unmarshal(scanner.Bytes(), &blockFS)
 
-		if err := state.apply(tx); err != nil {
+		// TODO : Validate blocks against block hash
+		if err := s.applyBlock(blockFS.Block); err != nil {
 			return nil, err
 		}
 	}
 
-	return state, nil
+	return s, nil
 }
 
 func LoadState() (*State, error) {
@@ -53,18 +56,33 @@ func LoadState() (*State, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	balances := make(map[Address]uint)
+
 	for addressHex, balance := range genesisContent.Balances {
-		state.Balances[NewAddress(addressHex)] = balance
+		balances[NewAddress(addressHex)] = balance
 	}
-	return loadStateFromDisk()
+
+	state := &State{balances, make([]Transaction, 0), nil, common.BytesToHash(nil), time.Now()}
+
+	return state.loadStateFromDisk()
 }
 
-func (s *State) apply(tx Transaction) error {
+func (s *State) applyBlock(b Block) error {
+	for _, tx := range b.Transactions {
+		if err := s.applyTransaction(tx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *State) applyTransaction(tx Transaction) error {
 	if tx.IsReward() {
-		state.Balances[tx.To()] += tx.Value()
+		s.Balances[tx.To()] += tx.Value()
 		return nil
 	}
-	if s.Balances[tx.From()] <= tx.Value() {
+	if s.Balances[tx.From()] < tx.Value() {
 		return fmt.Errorf("insufficient_balance")
 	}
 	s.Balances[tx.From()] -= tx.Value()
@@ -73,8 +91,8 @@ func (s *State) apply(tx Transaction) error {
 	return nil
 }
 
-func (s *State) Add(tx Transaction) error {
-	if err := s.apply(tx); err != nil {
+func (s *State) AddTransaction(tx Transaction) error {
+	if err := s.applyTransaction(tx); err != nil {
 		return err
 	}
 	s.txMemPool = append(s.txMemPool, tx)
@@ -82,28 +100,45 @@ func (s *State) Add(tx Transaction) error {
 	return nil
 }
 
-func (s *State) Persist() error {
-	// make a copy of txMemPool to since txMemPool can get txns added while looping
-	mempool := make([]Transaction, len(s.txMemPool))
+func (s *State) Persist() (common.Hash, error) {
+	// TODO : will multiple goroutines access this and result in loss of txns ?
+	// If not, the below 3 lines can be removed and optimised
+	mempoolLength := len(s.txMemPool)
+	mempool := make([]Transaction, mempoolLength)
 	copy(mempool, s.txMemPool)
 
-	for i := 0; i < len(mempool); i++ {
-		txJson, err := json.Marshal(mempool[i])
-		if err != nil {
-			return err
-		}
-
-		if _, err = s.dbFile.Write(append(txJson, '\n')); err != nil {
-			return err
-		}
-
-		s.txMemPool = s.txMemPool[1:]
+	// Create a new block
+	block := NewBlock(s.latestBlockHash, uint64(time.Now().UnixNano()), mempool)
+	blockHash, err := block.Hash()
+	if err != nil {
+		return common.Hash{}, err
 	}
 
-	return nil
+	// Persist the new block to file system
+	blockFS := BlockFS{blockHash, block}
+	blockFsJson, err := json.Marshal(blockFS)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	if _, err = s.dbFile.Write(append(blockFsJson, '\n')); err != nil {
+		return common.Hash{}, err
+	}
+	log.Println("Block created", blockHash)
 
+	// Update the latesh hash to the current one
+	s.latestBlockHash = blockHash
+
+	// reset the mempool
+	// TODO : Can be reset to empty if this is thread safe and optimised along with first 3 lines
+	s.txMemPool = s.txMemPool[mempoolLength:]
+
+	return blockHash, nil
 }
 
 func (s *State) Close() {
 	s.dbFile.Close()
+}
+
+func (s *State) LatestBlockHash() common.Hash {
+	return s.latestBlockHash
 }

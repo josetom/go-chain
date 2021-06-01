@@ -18,30 +18,18 @@ func setDataDirWithLocalTestPath() {
 	node.Config.DataDir = filepath.Join(cwd, "testdata")
 }
 
-// func TestLoadStateValid(t *testing.T) {
-// 	setDataDirWithLocalTestPath()
-// 	state, err := LoadState()
-// 	if err != nil {
-// 		t.Fail()
-// 	}
-// 	if state.Balances[NewAddress("0x3030303030303030303030303030303030313030")] != 600 {
-// 		t.Fail()
-// 	}
-// 	if state.Balances[NewAddress("0x3030303030303030303030303030303030323030")] != 100 {
-// 		t.Fail()
-// 	}
-// }
-
-func TestLoadStateMissingFile(t *testing.T) {
+func TestLoadStateValid(t *testing.T) {
 	setDataDirWithLocalTestPath()
-	Config.State.DbFile = "database/missing.db"
-	_, err := LoadState()
-	if err == nil {
+	state, err := LoadState()
+	if err != nil {
+		t.Fail()
+	}
+	if state.Balances[NewAddress("0x3030303030303030303030303030303030313030")] != 100 {
 		t.Fail()
 	}
 }
 
-func TestAddSuccess(t *testing.T) {
+func TestAddTransactionRewardSuccess(t *testing.T) {
 	state := &State{
 		txMemPool: make([]Transaction, 0),
 		Balances:  make(map[Address]uint),
@@ -53,13 +41,37 @@ func TestAddSuccess(t *testing.T) {
 		100,
 		"reward",
 	)
-	state.Add(txn)
+	err := state.AddTransaction(txn)
+	if err != nil {
+		t.Fail()
+	}
 	if state.txMemPool[0] != txn {
 		t.Fail()
 	}
 }
 
-func TestAddInsufficientBalance(t *testing.T) {
+func TestAddTransactionNonRewardSuccess(t *testing.T) {
+	setDataDirWithLocalTestPath()
+	state, err := LoadState()
+	if err != nil {
+		t.Fail()
+	}
+	txn := NewTransaction(
+		NewAddress("0x3030303030303030303030303030303030313030"),
+		NewAddress("0x3030303030303030303030303030303030323030"),
+		100,
+		"something else",
+	)
+	err = state.AddTransaction(txn)
+	if err != nil {
+		t.Fail()
+	}
+	if state.txMemPool[0] != txn {
+		t.Fail()
+	}
+}
+
+func TestAddTransactionInsufficientBalance(t *testing.T) {
 	state := &State{
 		txMemPool: make([]Transaction, 0),
 		Balances:  make(map[Address]uint),
@@ -69,9 +81,9 @@ func TestAddInsufficientBalance(t *testing.T) {
 		NewAddress("0x0000000000000000000000000000000000000000"),
 		NewAddress("0x3030303030303030303030303030303030313030"),
 		100,
-		"random data",
+		"something else",
 	)
-	err := state.Add(txn)
+	err := state.AddTransaction(txn)
 	if err == nil || err.Error() != "insufficient_balance" {
 		t.Fail()
 	}
@@ -91,23 +103,32 @@ func TestPersistSuccess(t *testing.T) {
 		100,
 		"reward",
 	)
-	txn.Timestamp = time.Time{}
-	state.Add(txn)
-	err := state.Persist()
+	txn.Timestamp = uint64(time.Time{}.UnixNano())
+	state.AddTransaction(txn)
+	blockHash, err := state.Persist()
 	if err != nil {
 		print(err)
 		t.Fail()
 	}
 
 	content, _ := ioutil.ReadFile(f.Name())
-	var t2 *Transaction
-	err = json.Unmarshal(content, &t2)
 
+	var blockFS *BlockFS
+	err = json.Unmarshal(content, &blockFS)
 	if err != nil {
 		t.Fail()
 	}
 
-	if *t2 != txn {
+	readBlockHash, err := blockFS.Block.Hash()
+	if err != nil {
+		t.Fail()
+	}
+
+	if blockHash.String() != readBlockHash.String() {
+		t.Fail()
+	}
+
+	if blockFS.Block.Transactions[0] != txn {
 		t.Fail()
 	}
 

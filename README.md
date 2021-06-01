@@ -1,4 +1,5 @@
 # Go Chain !
+A simple blockchain built with inspiration from geth
 
 ## Story 
 ### Supported
@@ -8,17 +9,20 @@
 - Hashing
 - Persist state
     - To a file in json format
+- Blocks
+    - Persist blocks in state.db
 ### Todo
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
     - Persist to leveldb
 - Blocks
-- Validate blocks 
-- Mine blocks
+    - Validate blocks 
+    - Mine blocks
+    - Change the current state persistance to mining based approach
 - Create Wallet
 - Synchronize new nodes
 - ...??
-
+- Fix TODO comments
 # Development
 ```sh
 go build ./cmd/go-chain/...

@@ -17,7 +17,7 @@ type TransactionData struct {
 type Transaction struct {
 	TxnData   TransactionData `json: "txndata"`
 	TxnHash   common.Hash     `json: "txnhash"`
-	Timestamp time.Time       `json :"timestamp"`
+	Timestamp uint64          `json :"timestamp"`
 }
 
 func (tx *Transaction) IsReward() bool {
@@ -28,7 +28,7 @@ func NewTransaction(from Address, to Address, value uint, data string) Transacti
 	txnData := TransactionData{from, to, value, data}
 	txn := Transaction{
 		TxnData:   txnData,
-		Timestamp: time.Now(),
+		Timestamp: uint64(time.Now().UnixNano()),
 	}
 	txn.Hash()
 	return txn
