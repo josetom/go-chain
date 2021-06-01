@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"time"
 
 	"github.com/josetom/go-chain/node"
 )
@@ -15,7 +14,7 @@ type GenesisConfig struct {
 }
 
 type Genesis struct {
-	Timestamp time.Time       `json: "timestamp"`
+	Timestamp uint64          `json: "timestamp"`
 	Config    GenesisConfig   `json: "config"`
 	Balances  map[string]uint `json: "balances"`
 }

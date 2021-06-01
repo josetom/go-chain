@@ -54,13 +54,14 @@ func txAddCmd() *cobra.Command {
 			defer state.Close()
 
 			// Add the TX to an in-memory array (pool)
-			err = state.Add(tx)
+			err = state.AddTransaction(tx)
 			if err != nil {
 				log.Fatalln(err)
 			}
 
 			// Flush the mempool TXs to disk
-			err = state.Persist()
+			// TODO : This is like automining txn. Needs to be updated
+			_, err = state.Persist()
 			if err != nil {
 				log.Fatalln(err)
 			}

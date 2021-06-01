@@ -33,7 +33,7 @@ var balancesListCmd = &cobra.Command{
 		}
 		defer state.Close()
 
-		log.Println("Address balances:")
+		log.Println("Address balances at ", state.LatestBlockHash().String())
 		log.Println("__________________")
 		log.Println("")
 		for address, balance := range state.Balances {
