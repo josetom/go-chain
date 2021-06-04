@@ -6,7 +6,7 @@ import (
 
 func TestLoadGenesis(t *testing.T) {
 	setDataDirWithLocalTestPath()
-	genesisContent, err := LoadGenesis()
+	genesisContent, err := loadGenesis()
 	if err != nil || genesisContent == nil {
 		t.Fail()
 	}

@@ -7,18 +7,18 @@ import (
 )
 
 type Block struct {
-	Header       BlockHeader   `json: "header"`
-	Transactions []Transaction `json: "transactions"`
+	Header       BlockHeader   `json:"header"`
+	Transactions []Transaction `json:"transactions"`
 }
 
 type BlockHeader struct {
-	ParentHash common.Hash `json: "parentHash"`
-	Timestamp  uint64      `json: timestamp`
+	ParentHash common.Hash `json:"parentHash"`
+	Timestamp  uint64      `json:"timestamp"`
 }
 
 type BlockFS struct {
-	Hash  common.Hash `json: "hash"`
-	Block Block       `json: "block"`
+	Hash  common.Hash `json:"hash"`
+	Block Block       `json:"block"`
 }
 
 func NewBlock(parentHash common.Hash, time uint64, transactions []Transaction) Block {

@@ -8,16 +8,16 @@ import (
 )
 
 type TransactionData struct {
-	From  Address `json: "from"`
-	To    Address `json: "to"`
-	Value uint    `json: "value"`
-	Data  string  `json: "data"`
+	From  Address `json:"from"`
+	To    Address `json:"to"`
+	Value uint    `json:"value"`
+	Data  string  `json:"data"`
 }
 
 type Transaction struct {
-	TxnData   TransactionData `json: "txndata"`
-	TxnHash   common.Hash     `json: "txnhash"`
-	Timestamp uint64          `json :"timestamp"`
+	TxnData   TransactionData `json:"txndata"`
+	TxnHash   common.Hash     `json:"txnhash"`
+	Timestamp uint64          `json:"timestamp"`
 }
 
 func (tx *Transaction) IsReward() bool {

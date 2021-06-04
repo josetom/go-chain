@@ -11,6 +11,7 @@ A simple blockchain built with inspiration from geth
     - To a file in json format
 - Blocks
     - Persist blocks in state.db
+- Http Server
 ### Todo
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance

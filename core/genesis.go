@@ -10,18 +10,18 @@ import (
 )
 
 type GenesisConfig struct {
-	ChainId string `json: "chainId"`
+	ChainId string `json:"chainId"`
 }
 
 type Genesis struct {
-	Timestamp uint64          `json: "timestamp"`
-	Config    GenesisConfig   `json: "config"`
-	Balances  map[string]uint `json: "balances"`
+	Timestamp uint64          `json:"timestamp"`
+	Config    GenesisConfig   `json:"config"`
+	Balances  map[string]uint `json:"balances"`
 }
 
 var genesisContent *Genesis
 
-func LoadGenesis() (*Genesis, error) {
+func loadGenesis() (*Genesis, error) {
 	genesisFilePath := filepath.Join(node.Config.DataDir, "database/genesis.json")
 	content, err := ioutil.ReadFile(genesisFilePath)
 	if err != nil {

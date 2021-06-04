@@ -1,4 +1,4 @@
 package constants
 
-const CliName = "gbc"
+const CliName = "go-chain"
 const BlockChainName string = "go-chain"

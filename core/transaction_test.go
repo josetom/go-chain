@@ -1,6 +1,7 @@
 package core
 
 import (
+	"log"
 	"testing"
 )
 
@@ -37,7 +38,8 @@ func TestTransactionHash(t *testing.T) {
 		100,
 		"reward",
 	)
-	if tx.TxnHash.String() != "0x2c46899f8df91ce9dcba95cdd63551524f5eba1e825399120a161be19605fe8c" {
+	if tx.TxnHash.String() != "0x7f9a283e2cccb8396e2cd5af4dbf357217edaf0f9b6be50225b8637db00cd2a3" {
+		log.Println(tx.TxnHash)
 		t.Fail()
 	}
 }
