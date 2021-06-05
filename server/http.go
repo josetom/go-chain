@@ -16,7 +16,7 @@ func HttpWrapper(
 	handler func(v interface{}) (interface{}, error),
 ) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := readReq(r, &reqObject)
+		err := readReqBody(r, &reqObject)
 		if err != nil {
 			writeErrRes(w, err)
 			return
@@ -37,7 +37,7 @@ type ErrRes struct {
 	Error string `json:"error"`
 }
 
-func readReq(r *http.Request, reqBody interface{}) error {
+func readReqBody(r *http.Request, reqBody interface{}) error {
 	reqBodyJson, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return fmt.Errorf("unable to read request body. %s", err.Error())
