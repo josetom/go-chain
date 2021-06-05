@@ -52,7 +52,7 @@ func (s *State) loadStateFromDisk() (*State, error) {
 }
 
 func LoadState() (*State, error) {
-	genesisContent, err := LoadGenesis()
+	genesisContent, err := loadGenesis()
 	if err != nil {
 		return nil, err
 	}

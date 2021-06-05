@@ -24,11 +24,10 @@ func Load(configFile string) Config {
 		if err != nil {
 			log.Fatalln("error while reading config file")
 		}
-
-		node.SetNodeConfig(&config.Node)
-		core.SetCoreConfig(&config.Core)
-
 	}
+
+	node.SetNodeConfig(&config.Node)
+	core.SetCoreConfig(&config.Core)
 
 	return config
 }

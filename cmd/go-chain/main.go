@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/josetom/go-chain/config"
 	"github.com/josetom/go-chain/constants"
 	"github.com/spf13/cobra"
 )
 
 func main() {
+
+	config.Load("config.yaml")
+
 	var cmd = &cobra.Command{
 		Use:   constants.CliName,
 		Short: constants.BlockChainName + " CLI",
@@ -21,7 +25,8 @@ func main() {
 	}
 
 	cmd.AddCommand(versionCmd)
-	cmd.AddCommand(consoleCmd)
+	cmd.AddCommand(runCmd)
+	cmd.AddCommand(configCmd)
 	cmd.AddCommand(balancesCmd())
 	cmd.AddCommand(txCmd())
 

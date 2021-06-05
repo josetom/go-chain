@@ -10,7 +10,8 @@ import (
 )
 
 var Defaults = NodeConfig{
-	DataDir: defaultDataDir(),
+	DataDir:  defaultDataDir(),
+	HttpPort: 8600,
 }
 
 func defaultDataDir() string {
