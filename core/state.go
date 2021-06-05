@@ -15,9 +15,11 @@ type State struct {
 	Balances  map[Address]uint
 	txMemPool []Transaction
 
-	dbFile          *os.File
+	dbFile *os.File
+	time   time.Time
+
+	latestBlock     Block
 	latestBlockHash common.Hash
-	time            time.Time
 }
 
 func (s *State) loadStateFromDisk() (*State, error) {
@@ -41,7 +43,7 @@ func (s *State) loadStateFromDisk() (*State, error) {
 		json.Unmarshal(scanner.Bytes(), &blockFS)
 
 		// TODO : Validate blocks against block hash
-		if err := s.applyBlock(blockFS.Block); err != nil {
+		if err := s.applyBlock(blockFS.Block, blockFS.Hash); err != nil {
 			return nil, err
 		}
 	}
@@ -61,17 +63,27 @@ func LoadState() (*State, error) {
 		balances[address] = balance
 	}
 
-	state := &State{balances, make([]Transaction, 0), nil, common.BytesToHash(nil), time.Now()}
+	state := &State{
+		Balances:        balances,
+		txMemPool:       make([]Transaction, 0),
+		dbFile:          nil,
+		time:            time.Now(),
+		latestBlock:     Block{},
+		latestBlockHash: common.BytesToHash(nil),
+	}
 
 	return state.loadStateFromDisk()
 }
 
-func (s *State) applyBlock(b Block) error {
+func (s *State) applyBlock(b Block, h common.Hash) error {
 	for _, tx := range b.Transactions {
 		if err := s.applyTransaction(tx); err != nil {
 			return err
 		}
 	}
+
+	s.latestBlock = b
+	s.latestBlockHash = h
 	return nil
 }
 
@@ -106,7 +118,7 @@ func (s *State) Persist() (common.Hash, error) {
 	copy(mempool, s.txMemPool)
 
 	// Create a new block
-	block := NewBlock(s.latestBlockHash, 0, uint64(time.Now().UnixNano()), mempool)
+	block := NewBlock(s.latestBlockHash, s.NextBlockNumber(), uint64(time.Now().UnixNano()), mempool)
 	blockHash, err := block.Hash()
 	if err != nil {
 		return common.Hash{}, err
@@ -123,7 +135,8 @@ func (s *State) Persist() (common.Hash, error) {
 	}
 	log.Println("Block created", blockHash)
 
-	// Update the latesh hash to the current one
+	// Update the latesh block & hash to the current one
+	s.latestBlock = block
 	s.latestBlockHash = blockHash
 
 	// reset the mempool
@@ -139,4 +152,12 @@ func (s *State) Close() {
 
 func (s *State) LatestBlockHash() common.Hash {
 	return s.latestBlockHash
+}
+
+func (s *State) LatestBlock() Block {
+	return s.latestBlock
+}
+
+func (s *State) NextBlockNumber() uint64 {
+	return s.latestBlock.Header.Number + 1
 }

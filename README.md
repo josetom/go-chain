@@ -17,7 +17,7 @@ A simple blockchain built with inspiration from geth
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
     - Persist to leveldb
 - Blocks
-    - Validate blocks 
+    - Validate blocks
     - Mine blocks
     - Change the current state persistance to mining based approach
 - Create Wallet

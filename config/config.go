@@ -6,6 +6,6 @@ import (
 )
 
 type Config struct {
-	Node node.NodeConfig `yaml :"node"`
-	Core core.CoreConfig `yaml :"core"`
+	Node node.NodeConfig `yaml:"node"`
+	Core core.CoreConfig `yaml:"core"`
 }

@@ -136,3 +136,14 @@ func TestPersistSuccess(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestNextBlockNumber(t *testing.T) {
+	state := &State{
+		txMemPool: make([]Transaction, 0),
+		Balances:  make(map[Address]uint),
+		dbFile:    nil,
+	}
+	if state.NextBlockNumber() != 1 {
+		t.Fail()
+	}
+}
