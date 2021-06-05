@@ -16,7 +16,16 @@ var runCmd = &cobra.Command{
 
 		log.Println("Launching go-chain node...")
 
+		err := core.InitFS()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Println("Initialized database")
+
 		state, err := core.LoadState()
+		if err != nil {
+			log.Fatalln(err)
+		}
 		log.Println("Loaded the state")
 
 		err = server.Run(state)

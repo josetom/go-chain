@@ -21,3 +21,10 @@ func TestUnmarshalText(t *testing.T) {
 	}
 
 }
+
+func TestIsEmpty(t *testing.T) {
+	h1 := Hash{}
+	if !h1.IsEmpty() {
+		t.Fail()
+	}
+}

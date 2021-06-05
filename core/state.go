@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/josetom/go-chain/common"
-	"github.com/josetom/go-chain/node"
 )
 
 type State struct {
@@ -23,10 +21,10 @@ type State struct {
 }
 
 func (s *State) loadStateFromDisk() (*State, error) {
-	txDbPath := filepath.Join(node.Config.DataDir, Config.State.DbFile)
-	f, err := os.OpenFile(txDbPath, os.O_APPEND|os.O_RDWR, 0600)
+	dbPath := GetBlocksDbPath()
+	f, err := os.OpenFile(dbPath, os.O_APPEND|os.O_RDWR, 0600)
 	if err != nil {
-		log.Print("unable to open txn file", txDbPath)
+		log.Print("unable to open db ", dbPath)
 		return nil, err
 	}
 
@@ -59,8 +57,8 @@ func LoadState() (*State, error) {
 
 	balances := make(map[Address]uint)
 
-	for addressHex, balance := range genesisContent.Balances {
-		balances[NewAddress(addressHex)] = balance
+	for address, balance := range genesisContent.Balances {
+		balances[address] = balance
 	}
 
 	state := &State{balances, make([]Transaction, 0), nil, common.BytesToHash(nil), time.Now()}
@@ -108,7 +106,7 @@ func (s *State) Persist() (common.Hash, error) {
 	copy(mempool, s.txMemPool)
 
 	// Create a new block
-	block := NewBlock(s.latestBlockHash, uint64(time.Now().UnixNano()), mempool)
+	block := NewBlock(s.latestBlockHash, 0, uint64(time.Now().UnixNano()), mempool)
 	blockHash, err := block.Hash()
 	if err != nil {
 		return common.Hash{}, err

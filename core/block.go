@@ -14,6 +14,7 @@ type Block struct {
 type BlockHeader struct {
 	ParentHash common.Hash `json:"parentHash"`
 	Timestamp  uint64      `json:"timestamp"`
+	Number     uint64      `json:"number"`
 }
 
 type BlockFS struct {
@@ -21,11 +22,12 @@ type BlockFS struct {
 	Block Block       `json:"block"`
 }
 
-func NewBlock(parentHash common.Hash, time uint64, transactions []Transaction) Block {
+func NewBlock(parentHash common.Hash, number uint64, time uint64, transactions []Transaction) Block {
 	return Block{
 		BlockHeader{
 			ParentHash: parentHash,
 			Timestamp:  time,
+			Number:     number,
 		},
 		transactions,
 	}

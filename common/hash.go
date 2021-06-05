@@ -38,3 +38,8 @@ func (h *Hash) setBytes(b []byte) {
 func (a *Hash) Equal(b Hash) bool {
 	return bytes.Equal(a.Bytes(), b.Bytes())
 }
+
+func (a Hash) IsEmpty() bool {
+	emptyHash := Hash{}
+	return a.Equal(emptyHash)
+}

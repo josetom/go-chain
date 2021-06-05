@@ -1,4 +1,5 @@
 .vscode
 .husky
 
+.database
 coverage.out

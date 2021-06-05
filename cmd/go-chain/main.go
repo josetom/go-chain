@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.LUTC)
 	config.Load("config.yaml")
 
 	var cmd = &cobra.Command{

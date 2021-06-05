@@ -35,3 +35,11 @@ go build ./cmd/go-chain/...
 go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ```
+
+# Quick hacks
+## If you want to view database files
+```sh
+mkdir .database
+cd ~/Libaray/go-chain
+ln -s ../../pet-project/blockchain/.database database
+```
