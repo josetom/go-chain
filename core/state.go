@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"time"
 
 	"github.com/josetom/go-chain/common"
@@ -16,12 +17,38 @@ type State struct {
 	txMemPool []Transaction
 
 	dbFile *os.File
-	time   time.Time
 
 	latestBlock     Block
 	latestBlockHash common.Hash
 }
 
+// 1. Initializes empty state
+// 2. Load Genesis block
+// 3. Loads the state from local db
+func LoadState() (*State, error) {
+	genesisContent, err := loadGenesis()
+	if err != nil {
+		return nil, err
+	}
+
+	balances := make(map[Address]uint)
+
+	for address, balance := range genesisContent.Balances {
+		balances[address] = balance
+	}
+
+	state := &State{
+		Balances:        balances,
+		txMemPool:       make([]Transaction, 0),
+		dbFile:          nil,
+		latestBlock:     Block{},
+		latestBlockHash: common.Hash{},
+	}
+
+	return state.loadStateFromDisk()
+}
+
+// Load blocks from local db and validate
 func (s *State) loadStateFromDisk() (*State, error) {
 	dbPath := GetBlocksDbPath()
 	f, err := os.OpenFile(dbPath, os.O_APPEND|os.O_RDWR, 0600)
@@ -39,54 +66,42 @@ func (s *State) loadStateFromDisk() (*State, error) {
 			return nil, err
 		}
 
-		var blockFS BlockFS
-		json.Unmarshal(scanner.Bytes(), &blockFS)
+		blockFsJson := scanner.Bytes()
+		if len(blockFsJson) == 0 {
+			break
+		}
 
-		// TODO : Validate blocks against block hash
-		if err := s.applyBlock(blockFS.Block, blockFS.Hash); err != nil {
+		var blockFS BlockFS
+		json.Unmarshal(blockFsJson, &blockFS)
+
+		if err := s.applyBlock(blockFS.Block); err != nil {
 			return nil, err
 		}
+
+		s.latestBlock = blockFS.Block
+		s.latestBlockHash = blockFS.Hash
+
 	}
 
 	return s, nil
 }
 
-func LoadState() (*State, error) {
-	genesisContent, err := loadGenesis()
-	if err != nil {
-		return nil, err
+// verifies if block can be added to the blockchain.
+// Block metadata are verified as well as transactions within (sufficient balances, etc).
+func (s *State) applyBlock(b Block) error {
+
+	if b.Header.Number != s.NextBlockNumber() {
+		return fmt.Errorf("next expected block must be '%d' not '%d'", s.NextBlockNumber(), b.Header.Number)
 	}
 
-	balances := make(map[Address]uint)
-
-	for address, balance := range genesisContent.Balances {
-		balances[address] = balance
+	if s.latestBlock.Header.Number > 0 && !reflect.DeepEqual(b.Header.ParentHash, s.latestBlockHash) {
+		return fmt.Errorf("next block parent hash must be '%x' not '%x'", s.latestBlockHash, b.Header.ParentHash)
 	}
 
-	state := &State{
-		Balances:        balances,
-		txMemPool:       make([]Transaction, 0),
-		dbFile:          nil,
-		time:            time.Now(),
-		latestBlock:     Block{},
-		latestBlockHash: common.BytesToHash(nil),
-	}
-
-	return state.loadStateFromDisk()
+	return s.applyTransactions(b.Transactions)
 }
 
-func (s *State) applyBlock(b Block, h common.Hash) error {
-	for _, tx := range b.Transactions {
-		if err := s.applyTransaction(tx); err != nil {
-			return err
-		}
-	}
-
-	s.latestBlock = b
-	s.latestBlockHash = h
-	return nil
-}
-
+// Validate current balances and update the balances
 func (s *State) applyTransaction(tx Transaction) error {
 	if tx.IsReward() {
 		s.Balances[tx.To()] += tx.Value()
@@ -101,6 +116,15 @@ func (s *State) applyTransaction(tx Transaction) error {
 	return nil
 }
 
+func (s *State) applyTransactions(txs []Transaction) error {
+	for _, tx := range txs {
+		if err := s.applyTransaction(tx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *State) AddTransaction(tx Transaction) error {
 	if err := s.applyTransaction(tx); err != nil {
 		return err
@@ -110,15 +134,23 @@ func (s *State) AddTransaction(tx Transaction) error {
 	return nil
 }
 
-func (s *State) Persist() (common.Hash, error) {
-	// TODO : will multiple goroutines access this and result in loss of txns ?
-	// If not, the below 3 lines can be removed and optimised
-	mempoolLength := len(s.txMemPool)
-	mempool := make([]Transaction, mempoolLength)
-	copy(mempool, s.txMemPool)
+func (s *State) AddBlocks(blocks []Block) error {
+	for _, block := range blocks {
+		if _, err := s.AddBlock(block); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-	// Create a new block
-	block := NewBlock(s.latestBlockHash, s.NextBlockNumber(), uint64(time.Now().UnixNano()), mempool)
+func (s *State) AddBlock(block Block) (common.Hash, error) {
+
+	pendingState := s.copy()
+	err := pendingState.applyBlock(block)
+	if err != nil {
+		return common.Hash{}, err
+	}
+
 	blockHash, err := block.Hash()
 	if err != nil {
 		return common.Hash{}, err
@@ -133,15 +165,15 @@ func (s *State) Persist() (common.Hash, error) {
 	if _, err = s.dbFile.Write(append(blockFsJson, '\n')); err != nil {
 		return common.Hash{}, err
 	}
-	log.Println("Block created", blockHash)
+	log.Println("Block added", blockHash)
 
-	// Update the latesh block & hash to the current one
+	// Update the balances, block & hash to the current one
+	s.Balances = pendingState.Balances
 	s.latestBlock = block
 	s.latestBlockHash = blockHash
 
-	// reset the mempool
-	// TODO : Can be reset to empty if this is thread safe and optimised along with first 3 lines
-	s.txMemPool = s.txMemPool[mempoolLength:]
+	//TODO : this is not there in the tutorial
+	s.txMemPool = s.txMemPool[len(pendingState.txMemPool):]
 
 	return blockHash, nil
 }
@@ -160,4 +192,27 @@ func (s *State) LatestBlock() Block {
 
 func (s *State) NextBlockNumber() uint64 {
 	return s.latestBlock.Header.Number + 1
+}
+
+func (s *State) copy() State {
+	c := State{}
+	c.latestBlock = s.latestBlock
+	c.latestBlockHash = s.latestBlockHash
+	c.txMemPool = make([]Transaction, 0)
+	c.Balances = make(map[Address]uint)
+
+	for acc, balance := range s.Balances {
+		c.Balances[acc] = balance
+	}
+
+	c.txMemPool = append(c.txMemPool, s.txMemPool...)
+
+	return c
+}
+
+// TODO : This needs to be changed
+func (s *State) Persist() (common.Hash, error) {
+	// Create a new block
+	block := NewBlock(s.latestBlockHash, s.NextBlockNumber(), uint64(time.Now().UnixNano()), s.txMemPool)
+	return s.AddBlock(block)
 }

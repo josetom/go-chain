@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/josetom/go-chain/node"
+	"github.com/josetom/go-chain/fs"
 )
 
 func setDataDirWithLocalTestPath() {
-	node.Config = &node.Defaults
+	fs.Config = &fs.Defaults
 	Config = &Defaults
 	cwd, _ := os.Getwd()
-	node.Config.DataDir = filepath.Join(cwd, "testdata")
+	fs.Config.DataDir = filepath.Join(cwd, "testdata")
 }
 
 func TestLoadStateValid(t *testing.T) {

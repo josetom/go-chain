@@ -1,71 +1,23 @@
 package node
 
-import (
-	"os"
-	"os/user"
-	"path/filepath"
-	"runtime"
-
-	"github.com/josetom/go-chain/constants"
-)
+func getDefaultBootstrapNodes() []BootstrapNodeConfig {
+	var bootstrapNodes = make([]BootstrapNodeConfig, 0)
+	bnc := BootstrapNodeConfig{
+		Host: "http://127.0.0.1:8600",
+	}
+	bootstrapNodes = append(bootstrapNodes, bnc)
+	return bootstrapNodes
+}
 
 var Defaults = NodeConfig{
-	DataDir:  defaultDataDir(),
-	HttpPort: 8600,
-}
-
-func defaultDataDir() string {
-	// Try to place the data folder in the user's home dir
-	home := homeDir()
-	if home != "" {
-		switch runtime.GOOS {
-		case "darwin":
-			return filepath.Join(home, "Library", constants.BlockChainName)
-		case "windows":
-			// We used to put everything in %HOME%\AppData\Roaming, but this caused
-			// problems with non-typical setups. If this fallback location exists and
-			// is non-empty, use it, otherwise DTRT and check %LOCALAPPDATA%.
-			fallback := filepath.Join(home, "AppData", "Roaming", constants.BlockChainName)
-			appdata := windowsAppData()
-			if appdata == "" || isNonEmptyDir(fallback) {
-				return fallback
-			}
-			return filepath.Join(appdata, constants.BlockChainName)
-		default:
-			return filepath.Join(home, ".", constants.BlockChainName)
-		}
-	}
-	// As we cannot guess a stable location, return empty and handle later
-	return ""
-}
-
-func windowsAppData() string {
-	v := os.Getenv("LOCALAPPDATA")
-	if v == "" {
-		// Windows XP and below don't have LocalAppData. Crash here because
-		// we don't support Windows XP and undefining the variable will cause
-		// other issues.
-		panic("environment variable LocalAppData is undefined")
-	}
-	return v
-}
-
-func isNonEmptyDir(dir string) bool {
-	f, err := os.Open(dir)
-	if err != nil {
-		return false
-	}
-	names, _ := f.Readdir(1)
-	f.Close()
-	return len(names) > 0
-}
-
-func homeDir() string {
-	if home := os.Getenv("HOME"); home != "" {
-		return home
-	}
-	if usr, err := user.Current(); err == nil {
-		return usr.HomeDir
-	}
-	return ""
+	Http: HttpConfig{
+		Protocol: "http",
+		Host:     "http://127.0.0.1:8600",
+		Port:     8600,
+	},
+	BootstrapNodes: getDefaultBootstrapNodes(),
+	IsBootstrap:    false,
+	Sync: SyncConfig{
+		TickerDuration: 45,
+	},
 }

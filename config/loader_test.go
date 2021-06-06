@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/josetom/go-chain/core"
-	"github.com/josetom/go-chain/node"
+	"github.com/josetom/go-chain/fs"
 )
 
 func TestLoadDefaults(t *testing.T) {
 	config := Load("")
-	if config.Node.DataDir != node.Defaults.DataDir {
-		log.Println("config.Node.DataDir -- ", config.Node.DataDir)
+	if config.FS.DataDir != fs.Defaults.DataDir {
+		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
 		t.Fail()
 	}
 	if config.Core.State.DbFile != core.Defaults.State.DbFile {
@@ -26,8 +26,8 @@ func TestLoadDefaults(t *testing.T) {
 
 func TestLoadValidFile(t *testing.T) {
 	config := Load("testdata/valid-config.yaml")
-	if config.Node.DataDir != "dummy_dir" {
-		log.Println("config.Node.DataDir -- ", config.Node.DataDir)
+	if config.FS.DataDir != "dummy_dir" {
+		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
 		t.Fail()
 	}
 	if config.Core.State.DbFile != "dummy_state_file" {
@@ -42,8 +42,8 @@ func TestLoadValidFile(t *testing.T) {
 
 func TestLoadPartialConfig(t *testing.T) {
 	config := Load("testdata/partial-config.yaml")
-	if config.Node.DataDir != node.Defaults.DataDir {
-		log.Println("config.Node.DataDir -- ", config.Node.DataDir)
+	if config.FS.DataDir != fs.Defaults.DataDir {
+		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
 		t.Fail()
 	}
 	if config.Core.State.DbFile != "dummy_state_file" {

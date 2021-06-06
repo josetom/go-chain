@@ -1,0 +1,158 @@
+package node
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/core"
+)
+
+const (
+	RequestAddPeers   = "/node/peers"
+	RequestNodeSync   = "/node/sync"
+	RequestNodeStatus = "/node/status"
+
+	QueryParamFromBlock = "fromBlock"
+)
+
+type ErrRes struct {
+	Error string `json:"error"`
+}
+
+type BalancesRes struct {
+	Balances map[core.Address]uint `json:"balances"`
+	Hash     common.Hash           `json:"block_hash"`
+}
+
+type NodeStatusRes struct {
+	Hash       common.Hash         `json:"block_hash"`
+	Number     uint64              `json:"block_number"`
+	Timestamp  uint64              `json:"block_timestamp"`
+	KnownPeers map[string]PeerNode `json:"peers_known"`
+}
+
+type NodeSyncRes struct {
+	Blocks []core.Block `json:"blocks"`
+}
+
+type NodeAddPeerRes struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+}
+
+func balancesHandler(w http.ResponseWriter, r *http.Request, state *core.State) {
+	switch r.Method {
+	case http.MethodGet:
+		res := BalancesRes{
+			Balances: state.Balances,
+			Hash:     state.LatestBlockHash(),
+		}
+		writeRes(w, res)
+	default:
+		writeErrRes(w, fmt.Errorf("only GET is supported"))
+	}
+}
+
+func transactionsHandler(w http.ResponseWriter, r *http.Request, state *core.State) {
+	switch r.Method {
+	case http.MethodPost:
+		reqObject := core.TransactionData{}
+		err := readReqBody(r, &reqObject)
+		if err != nil {
+			writeErrRes(w, err)
+			return
+		}
+
+		txn := core.NewTransaction(
+			reqObject.From,
+			reqObject.To,
+			reqObject.Value,
+			reqObject.Data,
+		)
+
+		err = state.AddTransaction(txn)
+
+		if err != nil {
+			writeErrRes(w, err)
+			return
+		}
+
+		_, err = state.Persist()
+
+		if err != nil {
+			writeErrRes(w, err)
+			return
+		}
+
+		writeRes(w, txn)
+	default:
+		writeErrRes(w, fmt.Errorf("only POST is supported"))
+	}
+}
+
+func nodeStatusHandler(w http.ResponseWriter, r *http.Request, n *Node) {
+	switch r.Method {
+	case http.MethodGet:
+		res := NodeStatusRes{
+			Hash:       n.state.LatestBlockHash(),
+			Number:     n.state.LatestBlock().Header.Number,
+			Timestamp:  n.state.LatestBlock().Header.Timestamp,
+			KnownPeers: n.knownPeers,
+		}
+		writeRes(w, res)
+	default:
+		writeErrRes(w, fmt.Errorf("only GET is supported"))
+	}
+}
+
+func nodeSyncHandler(w http.ResponseWriter, r *http.Request, state *core.State) {
+	switch r.Method {
+	case http.MethodGet:
+		reqHash := r.URL.Query().Get(QueryParamFromBlock)
+
+		hash := common.Hash{}
+		err := hash.UnmarshalText([]byte(reqHash))
+		if err != nil {
+			writeErrRes(w, err)
+			return
+		}
+
+		blocks, err := state.GetBlocksAfter(hash)
+		if err != nil {
+			writeErrRes(w, err)
+			return
+		}
+
+		res := NodeSyncRes{
+			Blocks: blocks,
+		}
+		writeRes(w, res)
+	default:
+		writeErrRes(w, fmt.Errorf("only GET is supported"))
+	}
+}
+
+func nodePeersHandler(w http.ResponseWriter, r *http.Request, n *Node) {
+	switch r.Method {
+	case http.MethodPost:
+		peer := PeerNode{}
+		err := readReqBody(r, &peer)
+		if err != nil {
+			writeErrRes(w, err)
+			return
+		}
+		peer.connected = true
+
+		n.AddPeer(peer)
+		log.Println("Added new peer", peer.Host)
+
+		res := NodeAddPeerRes{
+			Success: true,
+		}
+		writeRes(w, res)
+	default:
+		writeErrRes(w, fmt.Errorf("only POST is supported"))
+	}
+}

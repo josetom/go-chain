@@ -21,7 +21,10 @@ A simple blockchain built with inspiration from geth
     - Mine blocks
     - Change the current state persistance to mining based approach
 - Create Wallet
-- Synchronize new nodes
+- Node
+    - Peers
+    - Sync
+- Websockets
 - ...??
 - Fix TODO comments
 # Development
@@ -41,5 +44,5 @@ go tool cover -html=coverage.out
 ```sh
 mkdir .database
 cd ~/Libaray/go-chain
-ln -s ../../pet-project/blockchain/.database database
+ln -s ../../pet-project/blockchain/.database/database database
 ```

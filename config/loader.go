@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/josetom/go-chain/core"
+	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/node"
 	"gopkg.in/yaml.v2"
 )
@@ -26,6 +27,7 @@ func Load(configFile string) Config {
 		}
 	}
 
+	fs.SetFsConfig(&config.FS)
 	node.SetNodeConfig(&config.Node)
 	core.SetCoreConfig(&config.Core)
 

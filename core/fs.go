@@ -6,19 +6,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/josetom/go-chain/node"
+	"github.com/josetom/go-chain/fs"
 )
 
 func InitFS() error {
 	// Create Database directory if it doesn't exist
-	if isExist, _ := doesExist(GetDataDir()); !isExist {
+	if isExist, _ := fs.DoesExist(GetDataDir()); !isExist {
 		if err := os.MkdirAll(GetDataDir(), os.ModePerm); err != nil && !os.IsExist(err) {
 			return err
 		}
 	}
 
 	// Create Gensis file if it doesn't exist
-	if isExist, _ := doesExist(GetGenesisFilePath()); !isExist {
+	if isExist, _ := fs.DoesExist(GetGenesisFilePath()); !isExist {
 		genesisContent, err := json.Marshal(defaultGenesis)
 		if err != nil {
 			return err
@@ -29,15 +29,15 @@ func InitFS() error {
 	}
 
 	// Initialize empty block db if it doesn't exist
-	if isExist, _ := doesExist(GetBlocksDbPath()); !isExist {
-		writeEmptyBlocksDbToDisk(GetBlocksDbPath())
+	if isExist, _ := fs.DoesExist(GetBlocksDbPath()); !isExist {
+		fs.WriteEmptyBlocksDbToDisk(GetBlocksDbPath())
 	}
 
 	return nil
 }
 
 func GetDataDir() string {
-	return filepath.Join(node.Config.DataDir, "database")
+	return filepath.Join(fs.ExpandPath(fs.Config.DataDir), "database")
 }
 
 func GetGenesisFilePath() string {
@@ -46,16 +46,4 @@ func GetGenesisFilePath() string {
 
 func GetBlocksDbPath() string {
 	return filepath.Join(GetDataDir(), Config.State.DbFile)
-}
-
-func doesExist(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err != nil && os.IsNotExist(err) {
-		return false, err
-	}
-	return true, nil
-}
-
-func writeEmptyBlocksDbToDisk(path string) error {
-	return ioutil.WriteFile(path, []byte(""), os.ModePerm)
 }
