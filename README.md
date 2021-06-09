@@ -12,6 +12,9 @@ A simple blockchain built with inspiration from geth
 - Blocks
     - Persist blocks in state.db
 - Http Server
+- Node
+    - Peers
+    - Sync
 ### Todo
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
@@ -20,10 +23,9 @@ A simple blockchain built with inspiration from geth
     - Validate blocks
     - Mine blocks
     - Change the current state persistance to mining based approach
-- Create Wallet
 - Node
-    - Peers
-    - Sync
+    - Sync should happen only after the blocks are synced first time
+- Create Wallet
 - Websockets
 - ...??
 - Fix TODO comments

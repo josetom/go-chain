@@ -37,6 +37,10 @@ type NodeSyncRes struct {
 	Blocks []core.Block `json:"blocks"`
 }
 
+type NodeAddPeerReq struct {
+	Host string `json:"host"`
+}
+
 type NodeAddPeerRes struct {
 	Success bool   `json:"success"`
 	Error   string `json:"error"`

@@ -1,7 +1,9 @@
 package node
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -82,7 +84,6 @@ func (n *Node) syncBlocks(peer PeerNode, status NodeStatusRes) error {
 		return nil
 	}
 
-	// Display found 1 new block if we sync the genesis block 0
 	newBlocksCount := status.Number - localBlockNumber
 	if localBlockNumber == 0 && status.Number == 0 {
 		log.Printf("Found genesis new blocks from Peer %s\n", peer.Host)
@@ -115,14 +116,18 @@ func (n *Node) joinKnownPeer(peer PeerNode) error {
 	}
 
 	url := fmt.Sprintf(
-		"%s://%s%s?host=%s",
-		Config.Http.Protocol,
+		"%s%s",
 		peer.Host,
 		RequestAddPeers,
-		n.host,
 	)
 
-	res, err := http.Get(url)
+	body := &NodeAddPeerReq{
+		Host: n.host,
+	}
+	payloadBuf := new(bytes.Buffer)
+	json.NewEncoder(payloadBuf).Encode(body)
+
+	res, err := http.Post(url, "application/json", payloadBuf)
 	if err != nil {
 		return err
 	}
@@ -150,7 +155,7 @@ func (n *Node) joinKnownPeer(peer PeerNode) error {
 }
 
 func queryPeerStatus(peer PeerNode) (NodeStatusRes, error) {
-	url := fmt.Sprintf("http://%s%s", peer.Host, RequestNodeStatus)
+	url := fmt.Sprintf("%s%s", peer.Host, RequestNodeStatus)
 	res, err := http.Get(url)
 	if err != nil {
 		return NodeStatusRes{}, err
@@ -168,8 +173,7 @@ func queryPeerStatus(peer PeerNode) (NodeStatusRes, error) {
 func fetchBlocksFromPeer(peer PeerNode, hash common.Hash) ([]core.Block, error) {
 
 	url := fmt.Sprintf(
-		"%s://%s?%s%s=%s",
-		Config.Http.Protocol,
+		"%s%s?%s=%s",
 		peer.Host,
 		RequestNodeSync,
 		QueryParamFromBlock,
