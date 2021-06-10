@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/josetom/go-chain/common"
@@ -127,7 +126,7 @@ func (n *Node) joinKnownPeer(peer PeerNode) error {
 	payloadBuf := new(bytes.Buffer)
 	json.NewEncoder(payloadBuf).Encode(body)
 
-	res, err := http.Post(url, "application/json", payloadBuf)
+	res, err := httpClient.Post(url, "application/json", payloadBuf)
 	if err != nil {
 		return err
 	}
@@ -156,7 +155,7 @@ func (n *Node) joinKnownPeer(peer PeerNode) error {
 
 func queryPeerStatus(peer PeerNode) (NodeStatusRes, error) {
 	url := fmt.Sprintf("%s%s", peer.Host, RequestNodeStatus)
-	res, err := http.Get(url)
+	res, err := httpClient.Get(url)
 	if err != nil {
 		return NodeStatusRes{}, err
 	}
@@ -180,7 +179,7 @@ func fetchBlocksFromPeer(peer PeerNode, hash common.Hash) ([]core.Block, error) 
 		hash,
 	)
 
-	res, err := http.Get(url)
+	res, err := httpClient.Get(url)
 	if err != nil {
 		return nil, err
 	}

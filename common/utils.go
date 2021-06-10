@@ -3,6 +3,7 @@ package common
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 )
 
 // Converts bytes to sha256 hash
@@ -63,4 +64,9 @@ func UnmarshalUtil(b []byte) ([]byte, error) {
 
 func bytesHave0xPrefix(b []byte) bool {
 	return len(b) >= 2 && b[0] == '0' && (b[1] == 'x' || b[1] == 'X')
+}
+
+func DeepCopy(a interface{}, b interface{}) {
+	byt, _ := json.Marshal(a)
+	json.Unmarshal(byt, &b)
 }

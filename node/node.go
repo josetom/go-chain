@@ -52,7 +52,7 @@ func (n *Node) Run() error {
 	}
 	n.state = state
 	defer state.Close()
-	log.Println("Loaded state from disk")
+	log.Println("Loaded state from disk. Latest hash : ", state.LatestBlockHash())
 
 	ctx := context.Background()
 	go n.sync(ctx)

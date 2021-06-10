@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+var httpClient *http.Client = &http.Client{}
+
 func readReqBody(r *http.Request, reqBody interface{}) error {
 	reqBodyJson, err := ioutil.ReadAll(r.Body)
 	if err != nil {

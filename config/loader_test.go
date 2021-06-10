@@ -4,8 +4,10 @@ import (
 	"log"
 	"testing"
 
+	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
 	"github.com/josetom/go-chain/fs"
+	"github.com/josetom/go-chain/test_helper"
 )
 
 func TestLoadDefaults(t *testing.T) {
@@ -19,13 +21,13 @@ func TestLoadDefaults(t *testing.T) {
 		t.Fail()
 	}
 	cleanup := func() {
-		config = Defaults
+		common.DeepCopy(Defaults, config)
 	}
 	t.Cleanup(cleanup)
 }
 
 func TestLoadValidFile(t *testing.T) {
-	config := Load("testdata/valid-config.yaml")
+	config := Load(test_helper.GetTestFile("valid-config.yaml"))
 	if config.FS.DataDir != "dummy_dir" {
 		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
 		t.Fail()
@@ -35,13 +37,13 @@ func TestLoadValidFile(t *testing.T) {
 		t.Fail()
 	}
 	cleanup := func() {
-		config = Defaults
+		common.DeepCopy(Defaults, config)
 	}
 	t.Cleanup(cleanup)
 }
 
 func TestLoadPartialConfig(t *testing.T) {
-	config := Load("testdata/partial-config.yaml")
+	config := Load(test_helper.GetTestFile("partial-config.yaml"))
 	if config.FS.DataDir != fs.Defaults.DataDir {
 		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
 		t.Fail()
@@ -51,7 +53,7 @@ func TestLoadPartialConfig(t *testing.T) {
 		t.Fail()
 	}
 	cleanup := func() {
-		config = Defaults
+		common.DeepCopy(Defaults, config)
 	}
 	t.Cleanup(cleanup)
 }

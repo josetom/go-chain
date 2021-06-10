@@ -1,12 +1,18 @@
 package fs
 
-import "testing"
+import (
+	"log"
+	"testing"
+
+	"github.com/josetom/go-chain/test_helper"
+)
 
 func TestDoesExist(t *testing.T) {
-	if isExist, _ := DoesExist("testdata/valid.db"); !isExist {
+	if isExist, _ := DoesExist(test_helper.GetTestFile("valid.db")); !isExist {
+		log.Println(test_helper.GetTestFile("valid.db"))
 		t.Fail()
 	}
-	if isExist, _ := DoesExist("testdata/missing.db"); isExist {
+	if isExist, _ := DoesExist(test_helper.GetTestFile("missing.db")); isExist {
 		t.Fail()
 	}
 }

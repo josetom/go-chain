@@ -4,27 +4,20 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/josetom/go-chain/fs"
+	"github.com/josetom/go-chain/test_helper"
 )
 
-func setDataDirWithLocalTestPath() {
-	fs.Config = &fs.Defaults
-	Config = &Defaults
-	cwd, _ := os.Getwd()
-	fs.Config.DataDir = filepath.Join(cwd, "testdata")
-}
-
 func TestLoadStateValid(t *testing.T) {
-	setDataDirWithLocalTestPath()
+	fs.Config.DataDir = test_helper.GetTestDataDir()
 	state, err := LoadState()
 	if err != nil {
 		t.Fail()
 	}
-	if state.Balances[NewAddress("0x3030303030303030303030303030303030313030")] != 100 {
+	if state.Balances[NewAddress("0x3030303030303030303030303030303030313030")] != 200 {
 		t.Fail()
 	}
 }
@@ -51,7 +44,7 @@ func TestAddTransactionRewardSuccess(t *testing.T) {
 }
 
 func TestAddTransactionNonRewardSuccess(t *testing.T) {
-	setDataDirWithLocalTestPath()
+	fs.Config.DataDir = test_helper.GetTestDataDir()
 	state, err := LoadState()
 	if err != nil {
 		t.Fail()
@@ -91,7 +84,7 @@ func TestAddTransactionInsufficientBalance(t *testing.T) {
 
 func TestPersistSuccess(t *testing.T) {
 	f, _ := os.CreateTemp("", "persist.db") // Temp gives much better performance
-	// f, _ := os.Create("testdata/database/persist.db") // Use this to debug if there are any failures
+	// f, _ := os.Create(test_helper.GetTestFile("database/persist.db")) // Use this to debug if there are any failures
 	state := &State{
 		txMemPool: make([]Transaction, 0),
 		Balances:  make(map[Address]uint),
