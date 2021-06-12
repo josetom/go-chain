@@ -1,7 +1,5 @@
 package node
 
-import "github.com/josetom/go-chain/common"
-
 type NodeConfig struct {
 	Http           HttpConfig            `yaml:"http,omitempty"`
 	BootstrapNodes []BootstrapNodeConfig `yaml:"bootstrapNodes,omitempty"`
@@ -23,11 +21,7 @@ type SyncConfig struct {
 	TickerDuration uint64 `yaml:"tickerDuration,omitempty"`
 }
 
-var Config NodeConfig
-
-func init() {
-	common.DeepCopy(Defaults, &Config)
-}
+var Config NodeConfig = Defaults()
 
 func SetNodeConfig(nodeConfig NodeConfig) {
 	Config = nodeConfig

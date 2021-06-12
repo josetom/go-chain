@@ -121,7 +121,8 @@ func (n *Node) joinKnownPeer(peer PeerNode) error {
 	)
 
 	body := &NodeAddPeerReq{
-		Host: n.host,
+		Host:        n.host,
+		IsBootstrap: n.isBootstrap,
 	}
 	payloadBuf := new(bytes.Buffer)
 	json.NewEncoder(payloadBuf).Encode(body)

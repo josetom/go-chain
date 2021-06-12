@@ -9,15 +9,17 @@ func getDefaultBootstrapNodes() []BootstrapNodeConfig {
 	return bootstrapNodes
 }
 
-var Defaults = NodeConfig{
-	Http: HttpConfig{
-		Protocol: "http",
-		Host:     "http://127.0.0.1:8600",
-		Port:     8600,
-	},
-	BootstrapNodes: getDefaultBootstrapNodes(),
-	IsBootstrap:    false,
-	Sync: SyncConfig{
-		TickerDuration: 45,
-	},
+func Defaults() NodeConfig {
+	return NodeConfig{
+		Http: HttpConfig{
+			Protocol: "http",
+			Host:     "http://127.0.0.1:8600",
+			Port:     8600,
+		},
+		BootstrapNodes: getDefaultBootstrapNodes(),
+		IsBootstrap:    false,
+		Sync: SyncConfig{
+			TickerDuration: 45,
+		},
+	}
 }

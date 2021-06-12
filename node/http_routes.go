@@ -38,7 +38,8 @@ type NodeSyncRes struct {
 }
 
 type NodeAddPeerReq struct {
-	Host string `json:"host"`
+	Host        string `json:"host"`
+	IsBootstrap bool   `json:"isBootstrap"`
 }
 
 type NodeAddPeerRes struct {
@@ -46,12 +47,12 @@ type NodeAddPeerRes struct {
 	Error   string `json:"error"`
 }
 
-func balancesHandler(w http.ResponseWriter, r *http.Request, state *core.State) {
+func balancesHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 	switch r.Method {
 	case http.MethodGet:
 		res := BalancesRes{
-			Balances: state.Balances,
-			Hash:     state.LatestBlockHash(),
+			Balances: node.state.Balances,
+			Hash:     node.state.LatestBlockHash(),
 		}
 		writeRes(w, res)
 	default:
@@ -59,7 +60,7 @@ func balancesHandler(w http.ResponseWriter, r *http.Request, state *core.State) 
 	}
 }
 
-func transactionsHandler(w http.ResponseWriter, r *http.Request, state *core.State) {
+func transactionsHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 	switch r.Method {
 	case http.MethodPost:
 		reqObject := core.TransactionData{}
@@ -76,14 +77,14 @@ func transactionsHandler(w http.ResponseWriter, r *http.Request, state *core.Sta
 			reqObject.Data,
 		)
 
-		err = state.AddTransaction(txn)
+		err = node.state.AddTransaction(txn)
 
 		if err != nil {
 			writeErrRes(w, err)
 			return
 		}
 
-		_, err = state.Persist()
+		_, err = node.state.Persist()
 
 		if err != nil {
 			writeErrRes(w, err)
@@ -111,7 +112,7 @@ func nodeStatusHandler(w http.ResponseWriter, r *http.Request, n *Node) {
 	}
 }
 
-func nodeSyncHandler(w http.ResponseWriter, r *http.Request, state *core.State) {
+func nodeSyncHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 	switch r.Method {
 	case http.MethodGet:
 		reqHash := r.URL.Query().Get(QueryParamFromBlock)
@@ -123,7 +124,7 @@ func nodeSyncHandler(w http.ResponseWriter, r *http.Request, state *core.State) 
 			return
 		}
 
-		blocks, err := state.GetBlocksAfter(hash)
+		blocks, err := node.state.GetBlocksAfter(hash)
 		if err != nil {
 			writeErrRes(w, err)
 			return
@@ -141,13 +142,13 @@ func nodeSyncHandler(w http.ResponseWriter, r *http.Request, state *core.State) 
 func nodePeersHandler(w http.ResponseWriter, r *http.Request, n *Node) {
 	switch r.Method {
 	case http.MethodPost:
-		peer := PeerNode{}
-		err := readReqBody(r, &peer)
+		napq := NodeAddPeerReq{}
+		err := readReqBody(r, &napq)
 		if err != nil {
 			writeErrRes(w, err)
 			return
 		}
-		peer.connected = true
+		peer := NewPeerNode(napq.Host, napq.IsBootstrap, true)
 
 		n.AddPeer(peer)
 		log.Println("Added new peer", peer.Host)

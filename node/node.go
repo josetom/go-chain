@@ -58,11 +58,11 @@ func (n *Node) Run() error {
 	go n.sync(ctx)
 
 	http.HandleFunc("/balances", func(rw http.ResponseWriter, r *http.Request) {
-		balancesHandler(rw, r, n.state)
+		balancesHandler(rw, r, n)
 	})
 
 	http.HandleFunc("/transactions", func(rw http.ResponseWriter, r *http.Request) {
-		transactionsHandler(rw, r, n.state)
+		transactionsHandler(rw, r, n)
 	})
 
 	http.HandleFunc(RequestNodeStatus, func(rw http.ResponseWriter, r *http.Request) {
@@ -70,7 +70,7 @@ func (n *Node) Run() error {
 	})
 
 	http.HandleFunc(RequestNodeSync, func(rw http.ResponseWriter, r *http.Request) {
-		nodeSyncHandler(rw, r, n.state)
+		nodeSyncHandler(rw, r, n)
 	})
 
 	http.HandleFunc(RequestAddPeers, func(rw http.ResponseWriter, r *http.Request) {

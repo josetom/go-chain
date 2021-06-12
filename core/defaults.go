@@ -2,10 +2,12 @@ package core
 
 import "github.com/josetom/go-chain/constants"
 
-var Defaults = CoreConfig{
-	State: StateConfig{
-		DbFile: "state.db",
-	},
+func Defaults() CoreConfig {
+	return CoreConfig{
+		State: StateConfig{
+			DbFile: "state.db",
+		},
+	}
 }
 
 var defaultGenesis = Genesis{

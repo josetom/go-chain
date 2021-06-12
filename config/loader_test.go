@@ -12,11 +12,11 @@ import (
 
 func TestLoadDefaults(t *testing.T) {
 	config := Load("")
-	if config.FS.DataDir != fs.Defaults.DataDir {
+	if config.FS.DataDir != fs.Defaults().DataDir {
 		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
 		t.Fail()
 	}
-	if config.Core.State.DbFile != core.Defaults.State.DbFile {
+	if config.Core.State.DbFile != core.Defaults().State.DbFile {
 		log.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
 		t.Fail()
 	}
@@ -44,7 +44,7 @@ func TestLoadValidFile(t *testing.T) {
 
 func TestLoadPartialConfig(t *testing.T) {
 	config := Load(test_helper.GetTestFile("partial-config.yaml"))
-	if config.FS.DataDir != fs.Defaults.DataDir {
+	if config.FS.DataDir != fs.Defaults().DataDir {
 		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
 		t.Fail()
 	}

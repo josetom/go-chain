@@ -1,5 +1,7 @@
 package fs
 
-var Defaults = FsConfig{
-	DataDir: defaultDataDir(),
+func Defaults() FsConfig {
+	return FsConfig{
+		DataDir: defaultDataDir(),
+	}
 }

@@ -7,7 +7,7 @@ import (
 )
 
 var Defaults = Config{
-	FS:   fs.Defaults,
-	Node: node.Defaults,
-	Core: core.Defaults,
+	FS:   fs.Defaults(),
+	Node: node.Defaults(),
+	Core: core.Defaults(),
 }

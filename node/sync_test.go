@@ -1,8 +1,6 @@
 package node
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +12,8 @@ import (
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
+
+type HandlerFunc func(rw http.ResponseWriter, r *http.Request, n *Node)
 
 // RoundTrip .
 func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -27,42 +27,95 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 	}
 }
 
+func getDummyClient(t *testing.T, handler HandlerFunc) *http.Client {
+	return NewTestClient(func(req *http.Request) *http.Response {
+
+		node := NewNode()
+		state, err := core.LoadState()
+		if err != nil {
+			t.Fail()
+		}
+		node.state = state
+
+		req, err = http.NewRequest(req.Method, req.URL.String(), req.Body)
+		if err != nil {
+			t.Fail()
+		}
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			handler(rw, r, &node)
+		})
+		handler.ServeHTTP(rr, req)
+		return rr.Result()
+	})
+}
+
 func TestFetchBlocksFromPeer(t *testing.T) {
 	fs.Config.DataDir = test_helper.GetTestDataDir()
 
-	node := Node{}
+	node := NewNode()
+	peer := NewPeerNode(getDefaultBootstrapNodes()[0].Host, true, false)
+	httpClient = getDummyClient(t, nodeSyncHandler)
+
 	state, err := core.LoadState()
 	if err != nil {
 		t.Fail()
 	}
 	node.state = state
 
-	peer := PeerNode{}
-
-	httpClient = NewTestClient(func(req *http.Request) *http.Response {
-		payloadBuf := new(bytes.Buffer)
-		json.NewEncoder(payloadBuf).Encode(req.URL.Query().Encode())
-
-		req, err := http.NewRequest(req.Method, req.URL.String(), payloadBuf)
-		if err != nil {
-			t.Fail()
-		}
-		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			nodeSyncHandler(rw, r, node.state)
-		})
-		handler.ServeHTTP(rr, req)
-		return rr.Result()
-	})
-
 	blocks, err := fetchBlocksFromPeer(peer, common.Hash{})
+	if err != nil {
+		t.Fail()
+	}
 	if len(blocks) != 2 || err != nil {
 		hash, err := blocks[0].Hash()
 		if err != nil || hash.String() != "0xbfa63a77a70876ac1b5ebaba6d9113b181259aae5afa11207aeb5143a6ed9990" {
 			t.Fail()
 		}
 	}
+}
+
+func TestQueryPeerStatus(t *testing.T) {
+	fs.Config.DataDir = test_helper.GetTestDataDir()
+
+	node := NewNode()
+	peer := NewPeerNode(getDefaultBootstrapNodes()[0].Host, true, false)
+	httpClient = getDummyClient(t, nodeStatusHandler)
+
+	state, err := core.LoadState()
 	if err != nil {
+		t.Fail()
+	}
+	node.state = state
+
+	nodeStatusRes, err := queryPeerStatus(peer)
+	if err != nil {
+		t.Fail()
+	}
+	if nodeStatusRes.Hash.String() != "0x39714f635bda97ef70bf48ecae1a8ea27a42cc5e35dd40895db35d44107bf1bd" {
+		t.Fail()
+	}
+}
+
+func TestJoinKnownPeer(t *testing.T) {
+	fs.Config.DataDir = test_helper.GetTestDataDir()
+
+	node := NewNode()
+	peer := NewPeerNode(getDefaultBootstrapNodes()[0].Host, true, false)
+	httpClient = getDummyClient(t, nodePeersHandler)
+
+	state, err := core.LoadState()
+	if err != nil {
+		t.Fail()
+	}
+	node.state = state
+
+	err = (&node).joinKnownPeer(peer)
+	if err != nil {
+		t.Fail()
+	}
+
+	if !node.knownPeers[peer.Host].connected {
 		t.Fail()
 	}
 }

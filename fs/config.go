@@ -1,16 +1,10 @@
 package fs
 
-import "github.com/josetom/go-chain/common"
-
 type FsConfig struct {
 	DataDir string `yaml:"datadir,omitempty"`
 }
 
-var Config FsConfig
-
-func init() {
-	common.DeepCopy(Defaults, &Config)
-}
+var Config FsConfig = Defaults()
 
 func SetFsConfig(fsConfig FsConfig) {
 	Config = fsConfig
