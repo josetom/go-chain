@@ -10,12 +10,16 @@ import (
 )
 
 const (
-	RequestAddPeers   = "/node/peers"
-	RequestNodeSync   = "/node/sync"
-	RequestNodeStatus = "/node/status"
+	RequestBalances     = "/balances"
+	RequestTransactions = "/transactions"
+	RequestAddPeers     = "/node/peers"
+	RequestNodeStatus   = "/node/status"
+	RequestNodeSync     = "/node/sync"
 
 	QueryParamFromBlock = "fromBlock"
 )
+
+type HandlerFunc func(rw http.ResponseWriter, r *http.Request, n *Node)
 
 type ErrRes struct {
 	Error string `json:"error"`

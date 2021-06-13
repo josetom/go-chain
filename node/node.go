@@ -57,11 +57,11 @@ func (n *Node) Run() error {
 	ctx := context.Background()
 	go n.sync(ctx)
 
-	http.HandleFunc("/balances", func(rw http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(RequestBalances, func(rw http.ResponseWriter, r *http.Request) {
 		balancesHandler(rw, r, n)
 	})
 
-	http.HandleFunc("/transactions", func(rw http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(RequestTransactions, func(rw http.ResponseWriter, r *http.Request) {
 		transactionsHandler(rw, r, n)
 	})
 

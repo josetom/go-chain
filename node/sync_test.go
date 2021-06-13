@@ -13,8 +13,6 @@ import (
 
 type RoundTripFunc func(req *http.Request) *http.Response
 
-type HandlerFunc func(rw http.ResponseWriter, r *http.Request, n *Node)
-
 // RoundTrip .
 func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req), nil
