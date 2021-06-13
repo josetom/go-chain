@@ -1,4 +1,4 @@
-node:
+fs:
   datadir: "dummy_dir"
 core:
   state:

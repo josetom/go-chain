@@ -12,16 +12,21 @@ A simple blockchain built with inspiration from geth
 - Blocks
     - Persist blocks in state.db
 - Http Server
+- Node
+    - Peers
+    - Sync
 ### Todo
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
     - Persist to leveldb
 - Blocks
-    - Validate blocks 
+    - Validate blocks
     - Mine blocks
     - Change the current state persistance to mining based approach
+- Node
+    - Sync should happen only after the blocks are synced first time
 - Create Wallet
-- Synchronize new nodes
+- Websockets
 - ...??
 - Fix TODO comments
 # Development
@@ -34,4 +39,13 @@ go build ./cmd/go-chain/...
 ```sh
 go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
+go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}'
+```
+
+# Quick hacks
+## If you want to view database files
+```sh
+mkdir .database
+cd ~/Libaray/go-chain
+ln -s ../../pet-project/blockchain/.database/database database
 ```

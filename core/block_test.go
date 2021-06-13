@@ -16,9 +16,9 @@ func TestBlockHash(t *testing.T) {
 		"reward",
 	)
 	tx.Timestamp = uint64(time.Time{}.UnixNano())
-	block := NewBlock(common.BytesToHash(nil), uint64(time.Time{}.UnixNano()), []Transaction{tx})
+	block := NewBlock(common.Hash{}, 0, uint64(time.Time{}.UnixNano()), []Transaction{tx})
 	blockHash, err := block.Hash()
-	if blockHash.String() != "0xff312d625b214ae4eba8ed13055285b385d71ebbd1c5e2514c2a444b91de2c15" || err != nil {
+	if blockHash.String() != "0x8fc3e448220596d4caec6cf6b0767f27a6ff580ef4ae9d80798f14950f39e2a9" || err != nil {
 		log.Println(blockHash)
 		t.Fail()
 	}

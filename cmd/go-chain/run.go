@@ -4,8 +4,7 @@ import (
 	"log"
 
 	"github.com/josetom/go-chain/constants"
-	"github.com/josetom/go-chain/core"
-	"github.com/josetom/go-chain/server"
+	"github.com/josetom/go-chain/node"
 	"github.com/spf13/cobra"
 )
 
@@ -16,10 +15,9 @@ var runCmd = &cobra.Command{
 
 		log.Println("Launching go-chain node...")
 
-		state, err := core.LoadState()
-		log.Println("Loaded the state")
+		n := node.NewNode()
+		err := n.Run()
 
-		err = server.Run(state)
 		if err != nil {
 			log.Fatalln(err)
 		}

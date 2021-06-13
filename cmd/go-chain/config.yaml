@@ -1,0 +1,15 @@
+fs:
+  datadir: "~/pet-project/blockchain/.database"
+core:
+  state:
+    dbfile: "state.db"
+node:
+  sync:
+    tickerDuration: 45
+  isBootstrap: false
+  bootstrapNodes:
+    -  host: "http://127.0.0.1:8600"
+  http:
+    protocol: "http"
+    host: "http://127.0.0.1:8600"
+    port: 8600

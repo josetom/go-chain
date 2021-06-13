@@ -80,6 +80,10 @@ func TestUnmarshalUtil(t *testing.T) {
 	if err != nil || !bytes.Equal(u, Address_100_as_Bytes) {
 		t.Fail()
 	}
+	u1, err := UnmarshalUtil(make([]byte, 0))
+	if u1 != nil || err != nil {
+		t.Fail()
+	}
 }
 
 func TestBytesHave0xPrefix(t *testing.T) {
@@ -87,6 +91,14 @@ func TestBytesHave0xPrefix(t *testing.T) {
 		t.Fail()
 	}
 	if bytesHave0xPrefix(Address_100_Hex_without_0x_as_Bytes) {
+		t.Fail()
+	}
+}
+
+func TestDeepCopy(t *testing.T) {
+	var b interface{}
+	DeepCopy(Address_100_Hex_with_0x, &b)
+	if Address_100_Hex_with_0x != b {
 		t.Fail()
 	}
 }

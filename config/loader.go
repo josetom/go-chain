@@ -4,7 +4,9 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
+	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/node"
 	"gopkg.in/yaml.v2"
 )
@@ -12,7 +14,7 @@ import (
 var config Config
 
 func Load(configFile string) Config {
-	config = Defaults
+	common.DeepCopy(Defaults, &config)
 
 	content, err := ioutil.ReadFile(configFile)
 	if err != nil {
@@ -26,8 +28,9 @@ func Load(configFile string) Config {
 		}
 	}
 
-	node.SetNodeConfig(&config.Node)
-	core.SetCoreConfig(&config.Core)
+	fs.SetFsConfig(config.FS)
+	node.SetNodeConfig(config.Node)
+	core.SetCoreConfig(config.Core)
 
 	return config
 }
