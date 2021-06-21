@@ -10,23 +10,24 @@ import (
 )
 
 type Node struct {
-	dataDir     string
-	isBootstrap bool
-	host        string
+	dataDir string
+	info    PeerNode
 
 	state      *core.State
 	knownPeers map[string]PeerNode
+
+	miner Miner
 }
 
 func NewNode() Node {
 
 	knownPeers := make(map[string]PeerNode)
+	info := NewPeerNode(Config.Http.Host, Config.IsBootstrap, false)
 
 	n := Node{
-		dataDir:     core.GetDataDir(),
-		knownPeers:  knownPeers,
-		isBootstrap: Config.IsBootstrap,
-		host:        Config.Http.Host,
+		dataDir:    core.GetDataDir(),
+		knownPeers: knownPeers,
+		info:       info,
 	}
 
 	for _, bn := range Config.BootstrapNodes {
@@ -51,11 +52,16 @@ func (n *Node) Run() error {
 		log.Fatalln(err)
 	}
 	n.state = state
+	n.miner = InitMiner(state)
+
+	// TODO : set node ready to accept txns
+
 	defer state.Close()
 	log.Println("Loaded state from disk. Latest hash : ", state.LatestBlockHash())
 
 	ctx := context.Background()
 	go n.sync(ctx)
+	go n.miner.mainLoop(ctx)
 
 	http.HandleFunc(RequestBalances, func(rw http.ResponseWriter, r *http.Request) {
 		balancesHandler(rw, r, n)
@@ -77,6 +83,7 @@ func (n *Node) Run() error {
 		nodePeersHandler(rw, r, n)
 	})
 
+	log.Println("starting server in : ", Config.Http.Port)
 	return http.ListenAndServe(fmt.Sprintf(":%v", Config.Http.Port), nil)
 }
 

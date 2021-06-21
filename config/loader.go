@@ -28,9 +28,9 @@ func Load(configFile string) Config {
 		}
 	}
 
-	fs.SetFsConfig(config.FS)
-	node.SetNodeConfig(config.Node)
-	core.SetCoreConfig(config.Core)
+	fs.SetConfig(config.FS)
+	node.SetConfig(config.Node)
+	core.SetConfig(config.Core)
 
 	return config
 }

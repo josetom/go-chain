@@ -1,9 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 
+	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
+	"github.com/josetom/go-chain/node"
 	"github.com/spf13/cobra"
 )
 
@@ -39,34 +45,32 @@ func txAddCmd() *cobra.Command {
 			value, _ := cmd.Flags().GetUint(flagValue)
 			data, _ := cmd.Flags().GetString(flagData)
 
-			fromAcc := core.NewAddress(from)
-			toAcc := core.NewAddress(to)
+			fromAcc := common.NewAddress(from)
+			toAcc := common.NewAddress(to)
 
-			tx := core.NewTransaction(fromAcc, toAcc, value, data)
+			url := fmt.Sprintf(
+				"%s%s",
+				node.Config.Http.Host,
+				node.RequestTransactions,
+			)
 
-			state, err := core.LoadState()
-			if err != nil {
-				log.Fatalln(err)
+			body := &core.TransactionData{
+				From:  fromAcc,
+				To:    toAcc,
+				Value: value,
+				Data:  data,
 			}
 
-			// defer means, at the end of this function execution,
-			// execute the following statement (close DB file with all TXs)
-			defer state.Close()
+			payloadBuf := new(bytes.Buffer)
+			json.NewEncoder(payloadBuf).Encode(body)
 
-			// Add the TX to an in-memory array (pool)
-			err = state.AddTransaction(tx)
+			res, err := http.Post(url, "application/json", payloadBuf)
 			if err != nil {
-				log.Fatalln(err)
+				log.Panicln(err)
 			}
 
-			// Flush the mempool TXs to disk
-			// TODO : This is like automining txn. Needs to be updated
-			_, err = state.Persist()
-			if err != nil {
-				log.Fatalln(err)
-			}
-
-			log.Println("TX successfully added to the ledger.")
+			// TODO : see if this is working !
+			log.Println("TX successfully added to the ledger.", res)
 		},
 	}
 

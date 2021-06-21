@@ -27,6 +27,7 @@ A simple blockchain built with inspiration from geth
     - Sync should happen only after the blocks are synced first time
 - Create Wallet
 - Websockets
+- Coinbase (miner account) should be set in genesis file
 - ...??
 - Fix TODO comments
 # Development

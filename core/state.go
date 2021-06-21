@@ -7,14 +7,13 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"time"
+	"sort"
 
 	"github.com/josetom/go-chain/common"
 )
 
 type State struct {
-	Balances  map[Address]uint
-	txMemPool []Transaction
+	Balances map[common.Address]uint
 
 	dbFile *os.File
 
@@ -30,8 +29,12 @@ func LoadState() (*State, error) {
 	if err != nil {
 		return nil, err
 	}
+	genesisHash, err := genesisContent.Hash()
+	if err != nil {
+		return nil, err
+	}
 
-	balances := make(map[Address]uint)
+	balances := make(map[common.Address]uint)
 
 	for address, balance := range genesisContent.Balances {
 		balances[address] = balance
@@ -39,10 +42,9 @@ func LoadState() (*State, error) {
 
 	state := &State{
 		Balances:        balances,
-		txMemPool:       make([]Transaction, 0),
 		dbFile:          nil,
 		latestBlock:     Block{},
-		latestBlockHash: common.Hash{},
+		latestBlockHash: genesisHash,
 	}
 
 	return state.loadStateFromDisk()
@@ -74,6 +76,8 @@ func (s *State) loadStateFromDisk() (*State, error) {
 		var blockFS BlockFS
 		json.Unmarshal(blockFsJson, &blockFS)
 
+		log.Println(blockFS.Block.Hash())
+
 		if err := s.applyBlock(blockFS.Block); err != nil {
 			return nil, err
 		}
@@ -98,12 +102,21 @@ func (s *State) applyBlock(b Block) error {
 		return fmt.Errorf("next block parent hash must be '%x' not '%x'", s.latestBlockHash, b.Header.ParentHash)
 	}
 
+	blockHash, err := b.Hash()
+	if err != nil {
+		return err
+	}
+
+	if !IsBlockHashValid(blockHash) {
+		return fmt.Errorf("invalid block hash %x", blockHash)
+	}
+
 	return s.applyTransactions(b.Transactions)
 }
 
 // Validate current balances and update the balances
 func (s *State) applyTransaction(tx Transaction) error {
-	if tx.IsReward() {
+	if tx.TxnContent.IsReward {
 		s.Balances[tx.To()] += tx.Value()
 		return nil
 	}
@@ -117,6 +130,11 @@ func (s *State) applyTransaction(tx Transaction) error {
 }
 
 func (s *State) applyTransactions(txs []Transaction) error {
+	// Sort slice to ensure that the txns are ordered and don't lead to inconsistencies
+	sort.Slice(txs, func(i, j int) bool {
+		return txs[i].TxnContent.Timestamp < txs[j].TxnContent.Timestamp
+	})
+
 	for _, tx := range txs {
 		if err := s.applyTransaction(tx); err != nil {
 			return err
@@ -129,23 +147,13 @@ func (s *State) AddTransaction(tx Transaction) error {
 	if err := s.applyTransaction(tx); err != nil {
 		return err
 	}
-	s.txMemPool = append(s.txMemPool, tx)
 
-	return nil
-}
-
-func (s *State) AddBlocks(blocks []Block) error {
-	for _, block := range blocks {
-		if _, err := s.AddBlock(block); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
 func (s *State) AddBlock(block Block) (common.Hash, error) {
 
-	pendingState := s.copy()
+	pendingState := s.Copy()
 	err := pendingState.applyBlock(block)
 	if err != nil {
 		return common.Hash{}, err
@@ -172,9 +180,6 @@ func (s *State) AddBlock(block Block) (common.Hash, error) {
 	s.latestBlock = block
 	s.latestBlockHash = blockHash
 
-	//TODO : this is not there in the tutorial
-	s.txMemPool = s.txMemPool[len(pendingState.txMemPool):]
-
 	return blockHash, nil
 }
 
@@ -194,25 +199,15 @@ func (s *State) NextBlockNumber() uint64 {
 	return s.latestBlock.Header.Number + 1
 }
 
-func (s *State) copy() State {
+func (s *State) Copy() State {
 	c := State{}
 	c.latestBlock = s.latestBlock
 	c.latestBlockHash = s.latestBlockHash
-	c.txMemPool = make([]Transaction, 0)
-	c.Balances = make(map[Address]uint)
+	c.Balances = make(map[common.Address]uint)
 
 	for acc, balance := range s.Balances {
 		c.Balances[acc] = balance
 	}
 
-	c.txMemPool = append(c.txMemPool, s.txMemPool...)
-
 	return c
-}
-
-// TODO : This needs to be changed
-func (s *State) Persist() (common.Hash, error) {
-	// Create a new block
-	block := NewBlock(s.latestBlockHash, s.NextBlockNumber(), uint64(time.Now().UnixNano()), s.txMemPool)
-	return s.AddBlock(block)
 }

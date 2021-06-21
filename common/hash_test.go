@@ -4,20 +4,22 @@ import (
 	"bytes"
 	"log"
 	"testing"
+
+	"github.com/josetom/go-chain/test_helper"
 )
 
 func TestMarshalText(t *testing.T) {
-	h := BytesToHash(Address_100_as_Bytes)
+	h := BytesToHash(test_helper.Address_100_as_Bytes)
 	m, err := h.MarshalText()
-	if err != nil || !bytes.Equal(m, Hash_Address_100_with_0x_as_Bytes) {
+	if err != nil || !bytes.Equal(m, test_helper.Hash_Address_100_with_0x_as_Bytes) {
 		t.Fail()
 	}
 }
 
 func TestUnmarshalText(t *testing.T) {
 	var h Hash
-	h.UnmarshalText(Hash_Address_100_with_0x_as_Bytes)
-	if !h.Equal((Hash_Address_100_as_Bytes)) {
+	h.UnmarshalText(test_helper.Hash_Address_100_with_0x_as_Bytes)
+	if !h.Equal((test_helper.Hash_Address_100_as_Bytes)) {
 		t.Fail()
 	}
 
@@ -32,7 +34,7 @@ func TestIsEmpty(t *testing.T) {
 
 func TestString(t *testing.T) {
 	h := Hash{}
-	if h.String() != "0x0000000000000000000000000000000000000000000000000000000000000000" {
+	if h.String() != test_helper.Hash_0x {
 		t.Fail()
 	}
 }

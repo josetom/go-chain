@@ -4,11 +4,11 @@ import (
 	"testing"
 )
 
-func TestSetNodeConfig(t *testing.T) {
+func TestSetConfig(t *testing.T) {
 	testConfig := NodeConfig{
 		IsBootstrap: Defaults().IsBootstrap,
 	}
-	SetNodeConfig(testConfig)
+	SetConfig(testConfig)
 	if Config.IsBootstrap != Defaults().IsBootstrap {
 		t.Fail()
 	}

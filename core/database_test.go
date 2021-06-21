@@ -15,17 +15,17 @@ func TestGetBlocksAfter(t *testing.T) {
 	blocksFrom0, err := s.GetBlocksAfter(common.Hash{})
 	if len(blocksFrom0) != 2 || err != nil {
 		hash, err := blocksFrom0[0].Hash()
-		if err != nil || hash.String() != "0xbfa63a77a70876ac1b5ebaba6d9113b181259aae5afa11207aeb5143a6ed9990" {
+		if err != nil || hash.String() != test_helper.Hash_Block_0 {
 			t.Fail()
 		}
 	}
 
 	hash1 := common.Hash{}
-	hash1.UnmarshalText([]byte("0xbfa63a77a70876ac1b5ebaba6d9113b181259aae5afa11207aeb5143a6ed9990"))
+	hash1.UnmarshalText([]byte(test_helper.Hash_Block_0))
 	blocksFrom1, err := s.GetBlocksAfter(hash1)
 	if len(blocksFrom1) != 1 || err != nil {
 		hash, err := blocksFrom1[0].Hash()
-		if err != nil || hash.String() != "0x39714f635bda97ef70bf48ecae1a8ea27a42cc5e35dd40895db35d44107bf1bd" {
+		if err != nil || hash.String() != test_helper.Hash_Block_1 {
 			t.Fail()
 		}
 	}

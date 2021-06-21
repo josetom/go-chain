@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
 )
@@ -17,28 +18,19 @@ func TestLoadStateValid(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	if state.Balances[NewAddress("0x3030303030303030303030303030303030313030")] != 200 {
+	if state.Balances[common.NewAddress(test_helper.Address_100_Hex_with_0x)] != 200 {
 		t.Fail()
 	}
 }
 
 func TestAddTransactionRewardSuccess(t *testing.T) {
 	state := &State{
-		txMemPool: make([]Transaction, 0),
-		Balances:  make(map[Address]uint),
-		dbFile:    nil,
+		Balances: make(map[common.Address]uint),
+		dbFile:   nil,
 	}
-	txn := NewTransaction(
-		NewAddress("0x0000000000000000000000000000000000000000"),
-		NewAddress("0x3030303030303030303030303030303030313030"),
-		100,
-		"reward",
-	)
+	txn := getTestTxn(true)
 	err := state.AddTransaction(txn)
 	if err != nil {
-		t.Fail()
-	}
-	if state.txMemPool[0] != txn {
 		t.Fail()
 	}
 }
@@ -49,56 +41,51 @@ func TestAddTransactionNonRewardSuccess(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	txn := NewTransaction(
-		NewAddress("0x3030303030303030303030303030303030313030"),
-		NewAddress("0x3030303030303030303030303030303030323030"),
-		100,
-		"something else",
-	)
+	txn := getTestTxn(false)
 	err = state.AddTransaction(txn)
 	if err != nil {
-		t.Fail()
-	}
-	if state.txMemPool[0] != txn {
 		t.Fail()
 	}
 }
 
 func TestAddTransactionInsufficientBalance(t *testing.T) {
 	state := &State{
-		txMemPool: make([]Transaction, 0),
-		Balances:  make(map[Address]uint),
-		dbFile:    nil,
+		Balances: make(map[common.Address]uint),
+		dbFile:   nil,
 	}
-	txn := NewTransaction(
-		NewAddress("0x0000000000000000000000000000000000000000"),
-		NewAddress("0x3030303030303030303030303030303030313030"),
-		100,
-		"something else",
-	)
+	txn := getTestTxn(false)
 	err := state.AddTransaction(txn)
 	if err == nil || err.Error() != "insufficient_balance" {
 		t.Fail()
 	}
 }
 
-func TestPersistSuccess(t *testing.T) {
+func TestAddBlock(t *testing.T) {
 	f, _ := os.CreateTemp("", "persist.db") // Temp gives much better performance
 	// f, _ := os.Create(test_helper.GetTestFile("database/persist.db")) // Use this to debug if there are any failures
 	state := &State{
-		txMemPool: make([]Transaction, 0),
-		Balances:  make(map[Address]uint),
-		dbFile:    f,
+		Balances: make(map[common.Address]uint),
+		dbFile:   f,
 	}
-	txn := NewTransaction(
-		NewAddress("0x0000000000000000000000000000000000000000"),
-		NewAddress("0x3030303030303030303030303030303030313030"),
-		100,
-		"reward",
+	txn := getTestTxn(true)
+
+	block := NewBlock(
+		state.latestBlockHash,
+		state.NextBlockNumber(),
+		uint64(time.Now().UnixNano()),
+		0,
+		common.NewAddress(""), // miner.Config.Address
+		[]Transaction{txn},
 	)
-	txn.Timestamp = uint64(time.Time{}.UnixNano())
-	state.AddTransaction(txn)
-	blockHash, err := state.Persist()
+
+	validBlock, err := mineBlockHelper(block)
+	if err != nil {
+		print(err)
+		t.Fail()
+	}
+
+	blockHash, err := state.AddBlock(validBlock)
+
 	if err != nil {
 		print(err)
 		t.Fail()
@@ -124,17 +111,12 @@ func TestPersistSuccess(t *testing.T) {
 	if blockFS.Block.Transactions[0] != txn {
 		t.Fail()
 	}
-
-	if len(state.txMemPool) > 0 {
-		t.Fail()
-	}
 }
 
 func TestNextBlockNumber(t *testing.T) {
 	state := &State{
-		txMemPool: make([]Transaction, 0),
-		Balances:  make(map[Address]uint),
-		dbFile:    nil,
+		Balances: make(map[common.Address]uint),
+		dbFile:   nil,
 	}
 	if state.NextBlockNumber() != 1 {
 		t.Fail()

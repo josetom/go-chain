@@ -6,6 +6,6 @@ type FsConfig struct {
 
 var Config FsConfig = Defaults()
 
-func SetFsConfig(fsConfig FsConfig) {
+func SetConfig(fsConfig FsConfig) {
 	Config = fsConfig
 }

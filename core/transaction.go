@@ -8,34 +8,37 @@ import (
 )
 
 type TransactionData struct {
-	From  Address `json:"from"`
-	To    Address `json:"to"`
-	Value uint    `json:"value"`
-	Data  string  `json:"data"`
+	From  common.Address `json:"from"`
+	To    common.Address `json:"to"`
+	Value uint           `json:"value"`
+	Data  string         `json:"data"`
+}
+
+type TransactionContent struct {
+	TxnData   TransactionData `json:"txnData"`
+	Timestamp uint64          `json:"timestamp"`
+	IsReward  bool            `json:"isReward"`
 }
 
 type Transaction struct {
-	TxnData   TransactionData `json:"txndata"`
-	TxnHash   common.Hash     `json:"txnhash"`
-	Timestamp uint64          `json:"timestamp"`
+	TxnContent TransactionContent `json:"txnContent"`
+	TxnHash    common.Hash        `json:"txnhHsh"`
 }
 
-func (tx *Transaction) IsReward() bool {
-	return tx.TxnData.Data == "reward"
-}
-
-func NewTransaction(from Address, to Address, value uint, data string) Transaction {
+func NewTransaction(from common.Address, to common.Address, value uint, data string) Transaction {
 	txnData := TransactionData{from, to, value, data}
 	txn := Transaction{
-		TxnData:   txnData,
-		Timestamp: uint64(time.Now().UnixNano()),
+		TxnContent: TransactionContent{
+			TxnData:   txnData,
+			Timestamp: uint64(time.Now().UnixNano()),
+		},
 	}
-	txn.Hash()
+	txn.hash()
 	return txn
 }
 
-func (t *Transaction) Hash() error {
-	bytes, err := json.Marshal(t.TxnData)
+func (t *Transaction) hash() error {
+	bytes, err := json.Marshal(t.TxnContent)
 	if err == nil {
 		t.TxnHash = common.BytesToHash(bytes)
 		return nil
@@ -43,18 +46,22 @@ func (t *Transaction) Hash() error {
 	return err
 }
 
-func (t *Transaction) From() Address {
-	return t.TxnData.From
+func (t *Transaction) Hash() common.Hash {
+	return t.TxnHash
 }
 
-func (t *Transaction) To() Address {
-	return t.TxnData.To
+func (t *Transaction) From() common.Address {
+	return t.TxnContent.TxnData.From
+}
+
+func (t *Transaction) To() common.Address {
+	return t.TxnContent.TxnData.To
 }
 
 func (t *Transaction) Value() uint {
-	return t.TxnData.Value
+	return t.TxnContent.TxnData.Value
 }
 
 func (t *Transaction) Data() string {
-	return t.TxnData.Data
+	return t.TxnContent.TxnData.Data
 }

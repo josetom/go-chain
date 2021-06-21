@@ -1,5 +1,7 @@
 package node
 
+import "github.com/josetom/go-chain/common"
+
 func getDefaultBootstrapNodes() []BootstrapNodeConfig {
 	var bootstrapNodes = make([]BootstrapNodeConfig, 0)
 	bnc := BootstrapNodeConfig{
@@ -19,7 +21,11 @@ func Defaults() NodeConfig {
 		BootstrapNodes: getDefaultBootstrapNodes(),
 		IsBootstrap:    false,
 		Sync: SyncConfig{
-			TickerDuration: 45,
+			TickerDuration: 30,
+		},
+		Miner: MinerConfig{
+			TickerDuration: 60,
+			Address:        common.NewAddress("0x3030303030303030303030303030303030313030"),
 		},
 	}
 }
