@@ -47,6 +47,7 @@ func (t *Transaction) hash() error {
 }
 
 func (t *Transaction) Hash() common.Hash {
+	t.hash()
 	return t.TxnHash
 }
 

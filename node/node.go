@@ -38,7 +38,7 @@ func NewNode() Node {
 	return n
 }
 
-func (n *Node) Run() error {
+func (n *Node) Run(ctx context.Context) error {
 	log.Println("Initializing node")
 
 	err := core.InitFS()
@@ -59,7 +59,6 @@ func (n *Node) Run() error {
 	defer state.Close()
 	log.Println("Loaded state from disk. Latest hash : ", state.LatestBlockHash())
 
-	ctx := context.Background()
 	go n.sync(ctx)
 	go n.miner.mainLoop(ctx)
 
@@ -83,8 +82,20 @@ func (n *Node) Run() error {
 		nodePeersHandler(rw, r, n)
 	})
 
+	server := http.Server{
+		Addr: fmt.Sprintf(":%v", Config.Http.Port),
+	}
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			server.Close()
+		default:
+		}
+	}()
+
 	log.Println("starting server in : ", Config.Http.Port)
-	return http.ListenAndServe(fmt.Sprintf(":%v", Config.Http.Port), nil)
+	return server.ListenAndServe()
 }
 
 func (n *Node) AddPeer(peer PeerNode) {

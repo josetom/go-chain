@@ -1,32 +1,22 @@
-package core
+package test_helper_core
 
 import (
 	"time"
 
 	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/core"
 	"github.com/josetom/go-chain/test_helper"
 )
 
-func mineBlockHelper(pendingBlock Block) (Block, error) {
-	hash, err := pendingBlock.Hash()
-	if err != nil {
-		return Block{}, err
-	}
-	if IsBlockHashValid(hash) {
-		return pendingBlock, nil
-	}
-	pendingBlock.Header.Nonce = common.GenNonce()
-	return mineBlockHelper(pendingBlock)
-}
-
-func getTestTxn(isReward bool) Transaction {
+// Keep this in sync with getTestTxn in testhelper_test.go in core
+func GetTestTxn(isReward bool) core.Transaction {
 
 	data := test_helper.DUMMY_DATA
 	if isReward {
 		data = test_helper.REWARD
 	}
 
-	txn := NewTransaction(
+	txn := core.NewTransaction(
 		common.NewAddress(test_helper.Address_0_with_0x),
 		common.NewAddress(test_helper.Address_100_Hex_with_0x),
 		100,

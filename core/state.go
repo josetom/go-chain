@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"sort"
 
 	"github.com/josetom/go-chain/common"
 )
@@ -130,11 +129,6 @@ func (s *State) applyTransaction(tx Transaction) error {
 }
 
 func (s *State) applyTransactions(txs []Transaction) error {
-	// Sort slice to ensure that the txns are ordered and don't lead to inconsistencies
-	sort.Slice(txs, func(i, j int) bool {
-		return txs[i].TxnContent.Timestamp < txs[j].TxnContent.Timestamp
-	})
-
 	for _, tx := range txs {
 		if err := s.applyTransaction(tx); err != nil {
 			return err

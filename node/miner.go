@@ -142,7 +142,6 @@ func (m *Miner) mineBlockHelper(ctx context.Context, pendingBlock core.Block) (c
 		return core.Block{}, fmt.Errorf("mining cancelled for block : %d", pendingBlock.Header.Number)
 	default:
 	}
-
 	hash, err := pendingBlock.Hash()
 	if err != nil {
 		return core.Block{}, err

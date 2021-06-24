@@ -11,6 +11,8 @@ A simple blockchain built with inspiration from geth
     - To a file in json format
 - Blocks
     - Persist blocks in state.db
+    - Validate blocks
+    - Mine blocks
 - Http Server
 - Node
     - Peers
@@ -20,8 +22,6 @@ A simple blockchain built with inspiration from geth
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
     - Persist to leveldb
 - Blocks
-    - Validate blocks
-    - Mine blocks
     - Change the current state persistance to mining based approach
 - Node
     - Sync should happen only after the blocks are synced first time
