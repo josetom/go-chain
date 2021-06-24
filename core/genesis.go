@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+
+	"github.com/josetom/go-chain/common"
 )
 
 type GenesisConfig struct {
@@ -11,9 +13,9 @@ type GenesisConfig struct {
 }
 
 type Genesis struct {
-	Timestamp uint64           `json:"timestamp"`
-	Config    GenesisConfig    `json:"config"`
-	Balances  map[Address]uint `json:"balances"`
+	Timestamp uint64                  `json:"timestamp"`
+	Config    GenesisConfig           `json:"config"`
+	Balances  map[common.Address]uint `json:"balances"`
 }
 
 var genesisContent *Genesis
@@ -32,4 +34,12 @@ func loadGenesis() (*Genesis, error) {
 	log.Println("Genesis file loaded")
 
 	return genesisContent, nil
+}
+
+func (g Genesis) Hash() (common.Hash, error) {
+	blockJson, err := json.Marshal(g)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return common.BytesToHash(blockJson), nil
 }

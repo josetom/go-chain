@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	FS   fs.FsConfig     `yaml:"fs"`
-	Node node.NodeConfig `yaml:"node"`
-	Core core.CoreConfig `yaml:"core"`
+	FS   fs.FsConfig     `yaml:"fs,omitempty"`
+	Node node.NodeConfig `yaml:"node,omitempty"`
+	Core core.CoreConfig `yaml:"core,omitempty"`
 }

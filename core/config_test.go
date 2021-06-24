@@ -4,13 +4,13 @@ import (
 	"testing"
 )
 
-func TestSetCoreConfig(t *testing.T) {
+func TestSetConfig(t *testing.T) {
 	testConfig := CoreConfig{
 		State: StateConfig{
 			DbFile: Defaults().State.DbFile,
 		},
 	}
-	SetCoreConfig(testConfig)
+	SetConfig(testConfig)
 	if Config.State.DbFile != Defaults().State.DbFile {
 		t.Fail()
 	}

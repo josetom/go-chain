@@ -1,19 +1,19 @@
-package core
+package common
 
 import (
 	"bytes"
-
-	"github.com/josetom/go-chain/common"
 )
 
 const AddressLength = 20
 
 type Address [AddressLength]byte
 
+var ZeroAddress = NewAddress("0x0000000000000000000000000000000000000000")
+
 // Accepts a hex encoded address string eg. 0x30303030
 func NewAddress(value string) Address {
 	var a Address
-	a.SetBytes(common.Hex2Bytes(value))
+	a.SetBytes(Hex2Bytes(value))
 	return a
 }
 
@@ -37,8 +37,8 @@ func (a *Address) SetBytes(b []byte) {
 	copy(a[:], b)
 }
 
-func (a *Address) Hash() common.Hash {
-	return common.BytesToHash(a.Bytes())
+func (a *Address) Hash() Hash {
+	return BytesToHash(a.Bytes())
 }
 
 func (a *Address) Equal(b Address) bool {
@@ -47,17 +47,17 @@ func (a *Address) Equal(b Address) bool {
 
 // implement stringer interface
 func (a Address) String() string {
-	return common.Bytes2Hex(a.Bytes(), true)
+	return Bytes2Hex(a.Bytes(), true)
 }
 
 // MarshalJSON implements the json.Marshaler interface.
 func (a Address) MarshalText() ([]byte, error) {
-	return common.MarshalUtil(a.Bytes()), nil
+	return MarshalUtil(a.Bytes()), nil
 }
 
 // UnmarshalText parses a hash in hex syntax.
 func (a *Address) UnmarshalText(input []byte) error {
-	result, err := common.UnmarshalUtil(input)
+	result, err := UnmarshalUtil(input)
 	a.SetBytes(result)
 	return err
 }

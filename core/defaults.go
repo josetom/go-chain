@@ -1,11 +1,19 @@
 package core
 
-import "github.com/josetom/go-chain/constants"
+import (
+	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/constants"
+	"github.com/josetom/go-chain/test_helper"
+)
 
 func Defaults() CoreConfig {
 	return CoreConfig{
 		State: StateConfig{
 			DbFile: "state.db",
+		},
+		Block: BlockConfig{
+			Reward:     100,
+			Complexity: 1,
 		},
 	}
 }
@@ -18,8 +26,8 @@ var defaultGenesis = Genesis{
 	Balances:  getDefaultGenesisBalances(),
 }
 
-func getDefaultGenesisBalances() map[Address]uint {
-	var defaultGenesisBalances = make(map[Address]uint)
-	defaultGenesisBalances[NewAddress("0x0000000000000000000000000000000000000000")] = 1000000000
+func getDefaultGenesisBalances() map[common.Address]uint {
+	var defaultGenesisBalances = make(map[common.Address]uint)
+	defaultGenesisBalances[common.NewAddress(test_helper.Address_0_with_0x)] = 1000000000
 	return defaultGenesisBalances
 }

@@ -1,10 +1,13 @@
 package node
 
+import "github.com/josetom/go-chain/common"
+
 type NodeConfig struct {
 	Http           HttpConfig            `yaml:"http,omitempty"`
 	BootstrapNodes []BootstrapNodeConfig `yaml:"bootstrapNodes,omitempty"`
 	IsBootstrap    bool                  `yaml:"isBootstrap,omitempty"`
 	Sync           SyncConfig            `yaml:"sync,omitempty"`
+	Miner          MinerConfig           `yaml:"miner,omitempty"`
 }
 
 type HttpConfig struct {
@@ -21,8 +24,13 @@ type SyncConfig struct {
 	TickerDuration uint64 `yaml:"tickerDuration,omitempty"`
 }
 
+type MinerConfig struct {
+	Address        common.Address `yaml:"address,omitempty"`
+	TickerDuration uint64         `yaml:"tickerDuration,omitempty"`
+}
+
 var Config NodeConfig = Defaults()
 
-func SetNodeConfig(nodeConfig NodeConfig) {
+func SetConfig(nodeConfig NodeConfig) {
 	Config = nodeConfig
 }

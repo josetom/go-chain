@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/josetom/go-chain/constants"
@@ -15,8 +16,10 @@ var runCmd = &cobra.Command{
 
 		log.Println("Launching go-chain node...")
 
+		ctx := context.Background()
+
 		n := node.NewNode()
-		err := n.Run()
+		err := n.Run(ctx)
 
 		if err != nil {
 			log.Fatalln(err)

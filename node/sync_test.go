@@ -67,7 +67,7 @@ func TestFetchBlocksFromPeer(t *testing.T) {
 	}
 	if len(blocks) != 2 || err != nil {
 		hash, err := blocks[0].Hash()
-		if err != nil || hash.String() != "0xbfa63a77a70876ac1b5ebaba6d9113b181259aae5afa11207aeb5143a6ed9990" {
+		if err != nil || hash.String() != test_helper.Hash_Block_0 {
 			t.Fail()
 		}
 	}
@@ -90,7 +90,7 @@ func TestQueryPeerStatus(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	if nodeStatusRes.Hash.String() != "0x39714f635bda97ef70bf48ecae1a8ea27a42cc5e35dd40895db35d44107bf1bd" {
+	if nodeStatusRes.Hash.String() != test_helper.Hash_Block_1 {
 		t.Fail()
 	}
 }

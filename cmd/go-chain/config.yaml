@@ -1,11 +1,17 @@
 fs:
   datadir: "~/pet-project/blockchain/.database"
 core:
+  block:
+    reward: 100
+    complexity: 1
   state:
     dbfile: "state.db"
 node:
   sync:
-    tickerDuration: 45
+    tickerDuration: 10
+  miner:
+    tickerDuration: 10
+    address: "0x3030303030303030303030303030303030303030"
   isBootstrap: false
   bootstrapNodes:
     -  host: "http://127.0.0.1:8600"

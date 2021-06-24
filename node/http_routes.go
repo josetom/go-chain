@@ -26,15 +26,16 @@ type ErrRes struct {
 }
 
 type BalancesRes struct {
-	Balances map[core.Address]uint `json:"balances"`
-	Hash     common.Hash           `json:"block_hash"`
+	Balances map[common.Address]uint `json:"balances"`
+	Hash     common.Hash             `json:"block_hash"`
 }
 
 type NodeStatusRes struct {
-	Hash       common.Hash         `json:"block_hash"`
-	Number     uint64              `json:"block_number"`
-	Timestamp  uint64              `json:"block_timestamp"`
-	KnownPeers map[string]PeerNode `json:"peers_known"`
+	Hash        common.Hash         `json:"block_hash"`
+	Number      uint64              `json:"block_number"`
+	Timestamp   uint64              `json:"block_timestamp"`
+	KnownPeers  map[string]PeerNode `json:"peers_known"`
+	PendingTxns []core.Transaction  `json:"pending_txns"`
 }
 
 type NodeSyncRes struct {
@@ -81,14 +82,12 @@ func transactionsHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 			reqObject.Data,
 		)
 
-		err = node.state.AddTransaction(txn)
+		node.miner.txnsCh <- txn
 
 		if err != nil {
 			writeErrRes(w, err)
 			return
 		}
-
-		_, err = node.state.Persist()
 
 		if err != nil {
 			writeErrRes(w, err)
@@ -105,10 +104,11 @@ func nodeStatusHandler(w http.ResponseWriter, r *http.Request, n *Node) {
 	switch r.Method {
 	case http.MethodGet:
 		res := NodeStatusRes{
-			Hash:       n.state.LatestBlockHash(),
-			Number:     n.state.LatestBlock().Header.Number,
-			Timestamp:  n.state.LatestBlock().Header.Timestamp,
-			KnownPeers: n.knownPeers,
+			Hash:        n.state.LatestBlockHash(),
+			Number:      n.state.LatestBlock().Header.Number,
+			Timestamp:   n.state.LatestBlock().Header.Timestamp,
+			KnownPeers:  n.knownPeers,
+			PendingTxns: txnMapToArray(n.miner.pendingTxns),
 		}
 		writeRes(w, res)
 	default:

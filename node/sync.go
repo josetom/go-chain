@@ -29,7 +29,7 @@ func (n *Node) sync(ctx context.Context) error {
 
 func (n *Node) doSync() {
 	for _, peer := range n.knownPeers {
-		if n.host == peer.Host {
+		if n.info.Host == peer.Host {
 			continue
 		}
 
@@ -57,11 +57,14 @@ func (n *Node) doSync() {
 			continue
 		}
 
-		err = n.syncKnownPeers(peer, status)
+		err = n.syncKnownPeers(status)
 		if err != nil {
 			log.Printf("ERROR: %s\n", err)
 			continue
 		}
+
+		n.syncPendingTxs(peer, status.PendingTxns)
+
 	}
 }
 
@@ -95,10 +98,24 @@ func (n *Node) syncBlocks(peer PeerNode, status NodeStatusRes) error {
 		return err
 	}
 
-	return n.state.AddBlocks(blocks)
+	for _, block := range blocks {
+		_, err := n.state.AddBlock(block)
+		if err != nil {
+			return err
+		}
+		n.miner.syncBlockCh <- block
+	}
+
+	return nil
 }
 
-func (n *Node) syncKnownPeers(peer PeerNode, status NodeStatusRes) error {
+func (n *Node) syncPendingTxs(peer PeerNode, pendingTxns []core.Transaction) {
+	for _, txn := range pendingTxns {
+		n.miner.txnsCh <- txn
+	}
+}
+
+func (n *Node) syncKnownPeers(status NodeStatusRes) error {
 	for _, statusPeer := range status.KnownPeers {
 		if !n.IsKnownPeer(statusPeer) {
 			log.Printf("Found new Peer %s\n", statusPeer.Host)
@@ -121,8 +138,8 @@ func (n *Node) joinKnownPeer(peer PeerNode) error {
 	)
 
 	body := &NodeAddPeerReq{
-		Host:        n.host,
-		IsBootstrap: n.isBootstrap,
+		Host:        n.info.Host,
+		IsBootstrap: n.info.IsBootstrap,
 	}
 	payloadBuf := new(bytes.Buffer)
 	json.NewEncoder(payloadBuf).Encode(body)

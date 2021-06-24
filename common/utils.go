@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"math/rand"
+	"time"
 )
 
 // Converts bytes to sha256 hash
@@ -66,7 +68,12 @@ func bytesHave0xPrefix(b []byte) bool {
 	return len(b) >= 2 && b[0] == '0' && (b[1] == 'x' || b[1] == 'X')
 }
 
-func DeepCopy(a interface{}, b interface{}) {
-	byt, _ := json.Marshal(a)
-	json.Unmarshal(byt, &b)
+func DeepCopy(src interface{}, dst interface{}) {
+	byt, _ := json.Marshal(src)
+	json.Unmarshal(byt, &dst)
+}
+
+func GenNonce() uint64 {
+	rand.Seed(time.Now().UnixNano())
+	return uint64(rand.Int63())
 }

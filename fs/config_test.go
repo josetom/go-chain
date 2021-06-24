@@ -4,11 +4,11 @@ import (
 	"testing"
 )
 
-func TestSetFsConfig(t *testing.T) {
+func TestSetConfig(t *testing.T) {
 	testConfig := FsConfig{
 		DataDir: Defaults().DataDir,
 	}
-	SetFsConfig(testConfig)
+	SetConfig(testConfig)
 	if Config.DataDir != Defaults().DataDir {
 		t.Fail()
 	}
