@@ -25,7 +25,7 @@ func Defaults() NodeConfig {
 		},
 		Miner: MinerConfig{
 			TickerDuration: 60,
-			Address:        common.NewAddress("0x3030303030303030303030303030303030313030"),
+			Address:        common.NewAddress("0x38c4ce5b96044e7ddd9ad95947178ed3436a4539"),
 		},
 	}
 }

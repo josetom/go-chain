@@ -24,7 +24,8 @@ A simple blockchain built with inspiration from geth
 - Node
     - Sync should happen only after the blocks are synced first time
 - Websockets
-- Coinbase (miner account) should be set in genesis file
+- Dynaminc mining difficulty and block reward
+- Import private key
 - ...??
 - Fix TODO comments
 # Development
@@ -49,6 +50,17 @@ ln -s ../../pet-project/blockchain/.database/database database
 ```
 
 # Demo
+## Run console
+```sh
+./go-chain run
+```
+## Create Wallet
+```sh
+./go-chain wallet new-account
+./go-chain wallet print-pk --address="0xdd6b4d532aad2814bf5ea2bcc5e8939294857e6c"
+```
+## Add Txn
+Chain console should be running when transaction commands are called
 ```sh
 ./go-chain  tx add --from="0xdd6b4d532aad2814bf5ea2bcc5e8939294857e6c" --to="0x054b08ac0c3233efe965a6f24071de1353955e59" --value=50 --data="test"
 ```

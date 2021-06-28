@@ -15,12 +15,12 @@ import (
 	"github.com/josetom/go-chain/fs"
 )
 
-func getWalletDir() string {
+func GetWalletDir() string {
 	return filepath.Join(fs.ExpandPath(Config.DataDir), "keystore")
 }
 
 func NewKeystoreAccount(password string) (common.Address, error) {
-	ks := keystore.NewKeyStore(getWalletDir(), keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(GetWalletDir(), keystore.StandardScryptN, keystore.StandardScryptP)
 	acc, err := ks.NewAccount(password)
 	if err != nil {
 		return common.Address{}, err
@@ -28,7 +28,12 @@ func NewKeystoreAccount(password string) (common.Address, error) {
 	return common.Address(acc.Address), nil
 }
 
-func getKeyForAccount(acc accounts.Account, password string) (*keystore.Key, error) {
+func GetKeyForAddress(address common.Address, password string) (*keystore.Key, error) {
+	ks := keystore.NewKeyStore(GetWalletDir(), keystore.StandardScryptN, keystore.StandardScryptP)
+	acc, err := ks.Find(accounts.Account{Address: ethcommon.Address(address)})
+	if err != nil {
+		return &keystore.Key{}, err
+	}
 	ksAccJson, err := ioutil.ReadFile(acc.URL.Path)
 	if err != nil {
 		return &keystore.Key{}, err
@@ -52,12 +57,7 @@ func Sign(msg []byte, pk *ecdsa.PrivateKey) (common.Signature, error) {
 }
 
 func SignForAddress(msg []byte, address common.Address, password string) (common.Signature, error) {
-	ks := keystore.NewKeyStore(getWalletDir(), keystore.StandardScryptN, keystore.StandardScryptP)
-	acc, err := ks.Find(accounts.Account{Address: ethcommon.Address(address)})
-	if err != nil {
-		return common.Signature{}, err
-	}
-	key, err := getKeyForAccount(acc, password)
+	key, err := GetKeyForAddress(address, password)
 	if err != nil {
 		return common.Signature{}, err
 	}
