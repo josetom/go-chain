@@ -1,34 +1,40 @@
-package wallet
+package wallet_test
 
 import (
 	"testing"
 
 	"github.com/josetom/go-chain/test_helper"
 	"github.com/josetom/go-chain/test_helper/test_helper_core"
+	"github.com/josetom/go-chain/wallet"
 )
 
 func TestNewKeystoreAccount(t *testing.T) {
-	Config.DataDir = test_helper.CreateAndGetTestWalletDir(true)
-	_, err := NewKeystoreAccount(test_helper.WALLET_PWD)
+	wallet.Config.DataDir = test_helper.CreateAndGetTestWalletDir(true)
+	_, err := wallet.NewKeystoreAccount(test_helper.WALLET_PWD)
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	cleanup := func() {
 		test_helper.DeleteTestWalletDir()
-		Config.DataDir = Defaults().DataDir
+		wallet.Config.DataDir = wallet.Defaults().DataDir
 	}
 	t.Cleanup(cleanup)
 }
 
-func TestSignTxWithKeystoreAccountAndVerify(t *testing.T) {
-	Config.DataDir = test_helper.CreateAndGetTestWalletDir(false)
-	txn := test_helper_core.GetTestTxn(false)
-	signedTx, err := SignTxWithKeystoreAccount(txn, test_helper.WALLET_PWD)
+func TestSignForAddressAndVerify(t *testing.T) {
+	wallet.Config.DataDir = test_helper.CreateAndGetTestWalletDir(false)
+	txn := test_helper_core.GetTestTxn()
+	txnBytes, err := txn.Encode()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
-	isAuthentic, err := signedTx.IsAuthentic()
+	sig, err := wallet.SignForAddress(txnBytes, txn.From(), test_helper.WALLET_PWD)
+	if err != nil {
+		t.Error(err)
+	}
+	txn.WithSignature(sig)
+	isAuthentic, err := txn.IsAuthentic()
 	if err != nil || !isAuthentic {
-		t.Fail()
+		t.Error(err)
 	}
 }

@@ -69,8 +69,9 @@ func txAddCmd() *cobra.Command {
 				log.Panicln(err)
 			}
 
-			// TODO : see if this is working !
-			log.Println("TX successfully added to the ledger.", res)
+			txnRes := core.Transaction{}
+			node.ReadRes(res, &txnRes)
+			log.Println("TX successfully added to the ledger.", txnRes.TxnHash)
 		},
 	}
 

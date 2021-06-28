@@ -19,12 +19,9 @@ func mineBlockHelper(pendingBlock Block) (Block, error) {
 	return mineBlockHelper(pendingBlock)
 }
 
-func getTestTxn(isReward bool) Transaction {
+func getTestTxn() Transaction {
 
 	data := test_helper.DUMMY_DATA
-	if isReward {
-		data = test_helper.REWARD
-	}
 
 	txn := NewTransaction(
 		common.NewAddress(test_helper.Test_Address_1),
@@ -33,7 +30,7 @@ func getTestTxn(isReward bool) Transaction {
 		data,
 	)
 	txn.TxnContent.Timestamp = uint64(time.Time{}.UnixNano())
-	txn.TxnContent.IsReward = isReward
 	txn.Hash()
+	txn.Sign()
 	return txn
 }

@@ -27,6 +27,6 @@ var defaultGenesis = Genesis{
 
 func getDefaultGenesisBalances() map[common.Address]uint {
 	var defaultGenesisBalances = make(map[common.Address]uint)
-	defaultGenesisBalances[common.ZeroAddress] = 1000000000
+	defaultGenesisBalances[common.Address{}] = 1000000000
 	return defaultGenesisBalances
 }

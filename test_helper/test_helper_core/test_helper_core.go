@@ -9,12 +9,9 @@ import (
 )
 
 // Keep this in sync with getTestTxn in testhelper_test.go in core
-func GetTestTxn(isReward bool) core.Transaction {
+func GetTestTxn() core.Transaction {
 
 	data := test_helper.DUMMY_DATA
-	if isReward {
-		data = test_helper.REWARD
-	}
 
 	txn := core.NewTransaction(
 		common.NewAddress(test_helper.Test_Address_1),
@@ -23,7 +20,7 @@ func GetTestTxn(isReward bool) core.Transaction {
 		data,
 	)
 	txn.TxnContent.Timestamp = uint64(time.Time{}.UnixNano())
-	txn.TxnContent.IsReward = isReward
 	txn.Hash()
+	txn.Sign()
 	return txn
 }

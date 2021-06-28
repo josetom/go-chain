@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/wallet"
 )
 
 type TransactionData struct {
@@ -18,7 +19,6 @@ type TransactionData struct {
 type TransactionContent struct {
 	TxnData   TransactionData `json:"txnData"`
 	Timestamp uint64          `json:"timestamp"`
-	IsReward  bool            `json:"isReward"`
 }
 
 type Transaction struct {
@@ -36,6 +36,8 @@ func NewTransaction(from common.Address, to common.Address, value uint, data str
 		},
 	}
 	txn.hash()
+	// TODO : check when to sign
+	txn.Sign()
 	return txn
 }
 
@@ -82,7 +84,7 @@ func (t *Transaction) IsAuthentic() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	recoveredAddr, err := common.VerifyAndRecoverAccount(txnBytes, t.Signature)
+	recoveredAddr, err := wallet.VerifyAndRecoverAccount(txnBytes, t.Signature)
 	if err != nil {
 		return false, err
 	}
@@ -92,11 +94,16 @@ func (t *Transaction) IsAuthentic() (bool, error) {
 	return true, nil
 }
 
-// func (t *Transaction) Sign() error {
-// 	txnBytes, err := t.Encode()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	sig
-// 	t.WithSignature(sig)
-// }
+func (t *Transaction) Sign() error {
+	txnBytes, err := t.Encode()
+	if err != nil {
+		return err
+	}
+	// TODO : password needs to be changed
+	sig, err := wallet.SignForAddress(txnBytes, t.From(), "wallet_pwd")
+	if err != nil {
+		return err
+	}
+	t.WithSignature(sig)
+	return nil
+}

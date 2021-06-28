@@ -154,15 +154,5 @@ func (m *Miner) mineBlockHelper(ctx context.Context, pendingBlock core.Block) (c
 }
 
 func (m *Miner) mineBlock(ctx context.Context, pendingBlock core.Block) (core.Block, error) {
-	// Add a reward transaction for the block that is to be mined
-	txn := core.NewTransaction(
-		common.ZeroAddress,
-		Config.Miner.Address,
-		uint(core.Config.Block.Reward),
-		"reward",
-	)
-	txn.TxnContent.IsReward = true
-	pendingBlock.Transactions = append(pendingBlock.Transactions, txn)
-
 	return m.mineBlockHelper(ctx, pendingBlock)
 }

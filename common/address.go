@@ -8,8 +8,6 @@ const AddressLength = 20
 
 type Address [AddressLength]byte
 
-var ZeroAddress = NewAddress("0x0000000000000000000000000000000000000000")
-
 // Accepts a hex encoded address string eg. 0x30303030
 func NewAddress(value string) Address {
 	var a Address

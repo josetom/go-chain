@@ -4,26 +4,25 @@ A simple blockchain built with inspiration from geth
 ## Story 
 ### Supported
 - Genesis
-- Load persisted state
-- Add Transactions
+- State
+- Transactions
 - Hashing
-- Persist state
-    - To a file in json format
 - Blocks
-    - Persist blocks in state.db
     - Validate blocks
     - Mine blocks
 - Http Server
 - Node
     - Peers
     - Sync
+- Wallets
 ### Todo
+- Transactions
+    - Block txn from zero address
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
     - Persist to leveldb
 - Node
     - Sync should happen only after the blocks are synced first time
-- Wallets
 - Websockets
 - Coinbase (miner account) should be set in genesis file
 - ...??
@@ -47,4 +46,9 @@ go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length
 mkdir .database
 cd ~/Libaray/go-chain
 ln -s ../../pet-project/blockchain/.database/database database
+```
+
+# Demo
+```sh
+./go-chain  tx add --from="0xdd6b4d532aad2814bf5ea2bcc5e8939294857e6c" --to="0x054b08ac0c3233efe965a6f24071de1353955e59" --value=50 --data="test"
 ```

@@ -10,8 +10,8 @@ import (
 )
 
 func TestBlockHash(t *testing.T) {
-	txn := getTestTxn(true)
-	block := NewBlock(common.Hash{}, 0, uint64(time.Time{}.UnixNano()), 0, common.ZeroAddress, []Transaction{txn})
+	txn := getTestTxn()
+	block := NewBlock(common.Hash{}, 0, uint64(time.Time{}.UnixNano()), 0, common.Address{}, []Transaction{txn})
 	blockHash, err := block.Hash()
 	if blockHash.String() != test_helper.Hash_Block_100_Reward || err != nil {
 		log.Println(blockHash)

@@ -22,13 +22,12 @@ const (
 
 	Hash_0x = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-	Hash_Block_0 = "0xbb20959c70b009f933e62e3f433b6bacdb96814aee07326defe0fa6a45999fa0"
-	Hash_Block_1 = "0x3e6f52df27a0fc35927ef6708eb8c3f2784fa00aebb3785f6d4f3b27db3741c0"
+	Hash_Block_0 = "0x6fc1ae945162f455e143e2005fd56d501ec92e2f3da12bc53f34e17f255255f0"
+	Hash_Block_1 = "0x6f459066c9e5014d7e9fc7300f5c2568cf97d46e42074a9d47fcc4440b1575f0"
 
-	Hash_Txn_100_Reward   = "0xc1d4f07a2f2140a25a0cdc1e4a38f43cdd73474311312da15286450745fb9d2c"
-	Hash_Block_100_Reward = "0xcb01eb91540a43f8afa46b94b9a23ad3ba87fe90f9b7ffd60758a1b5efa1f2ba"
+	Hash_Txn_100_Reward   = "0x6e6cdf6ae97854dcf5111f3aab286aed4efd49355b5d8f46c76472f1a03abbd7"
+	Hash_Block_100_Reward = "0xb9172dc5d46b4c8c3bab36bad278f96130d8d61ccba19506865fad00229b54d6"
 
-	REWARD     = "reward"
 	DUMMY_DATA = "something else"
 
 	WALLET_PWD = "wallet_pwd"

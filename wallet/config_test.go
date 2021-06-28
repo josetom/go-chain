@@ -1,19 +1,21 @@
-package wallet
+package wallet_test
 
 import (
 	"testing"
+
+	"github.com/josetom/go-chain/wallet"
 )
 
 func TestSetConfig(t *testing.T) {
-	testConfig := WalletConfig{
-		DataDir: Defaults().DataDir,
+	testConfig := wallet.WalletConfig{
+		DataDir: wallet.Defaults().DataDir,
 	}
-	SetConfig(testConfig)
-	if Config.DataDir != Defaults().DataDir {
+	wallet.SetConfig(testConfig)
+	if wallet.Config.DataDir != wallet.Defaults().DataDir {
 		t.Fail()
 	}
 	cleanup := func() {
-		Config = Defaults()
+		wallet.Config = wallet.Defaults()
 	}
 	t.Cleanup(cleanup)
 }

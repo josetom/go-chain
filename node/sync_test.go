@@ -31,13 +31,13 @@ func getDummyClient(t *testing.T, handler HandlerFunc) *http.Client {
 		node := NewNode()
 		state, err := core.LoadState()
 		if err != nil {
-			t.Fail()
+			t.Error(err)
 		}
 		node.state = state
 
 		req, err = http.NewRequest(req.Method, req.URL.String(), req.Body)
 		if err != nil {
-			t.Fail()
+			t.Error(err)
 		}
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
