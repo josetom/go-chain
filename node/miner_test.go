@@ -20,7 +20,7 @@ func TestMine(t *testing.T) {
 		t.Fail()
 	}
 
-	txn := test_helper_core.GetTestTxn(false)
+	txn := test_helper_core.GetTestTxn()
 
 	ctx := context.Background()
 	miner := InitMiner(state)

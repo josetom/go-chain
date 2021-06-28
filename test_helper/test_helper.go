@@ -29,3 +29,20 @@ func DeleteTestDbFile() {
 		log.Println(err)
 	}
 }
+
+func CreateAndGetTestWalletDir(isTemp bool) string {
+	if isTemp {
+		dir := GetTestFile("temp/wallet")
+		os.MkdirAll(dir, os.ModePerm)
+		return dir
+	} else {
+		return GetTestDataDir()
+	}
+}
+
+func DeleteTestWalletDir() {
+	err := os.RemoveAll(GetTestFile("temp/wallet"))
+	if err != nil {
+		log.Println(err)
+	}
+}

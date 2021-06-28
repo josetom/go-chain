@@ -18,30 +18,18 @@ func TestLoadStateValid(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	if state.Balances[common.NewAddress(test_helper.Address_100_Hex_with_0x)] != 200 {
+	if state.Balances[common.NewAddress(test_helper.Test_Address_2)] != 200 {
 		t.Fail()
 	}
 }
 
-func TestAddTransactionRewardSuccess(t *testing.T) {
-	state := &State{
-		Balances: make(map[common.Address]uint),
-		dbFile:   nil,
-	}
-	txn := getTestTxn(true)
-	err := state.AddTransaction(txn)
-	if err != nil {
-		t.Fail()
-	}
-}
-
-func TestAddTransactionNonRewardSuccess(t *testing.T) {
+func TestAddTransactionSuccess(t *testing.T) {
 	fs.Config.DataDir = test_helper.GetTestDataDir()
 	state, err := LoadState()
 	if err != nil {
 		t.Fail()
 	}
-	txn := getTestTxn(false)
+	txn := getTestTxn()
 	err = state.AddTransaction(txn)
 	if err != nil {
 		t.Fail()
@@ -53,7 +41,7 @@ func TestAddTransactionInsufficientBalance(t *testing.T) {
 		Balances: make(map[common.Address]uint),
 		dbFile:   nil,
 	}
-	txn := getTestTxn(false)
+	txn := getTestTxn()
 	err := state.AddTransaction(txn)
 	if err == nil || err.Error() != "insufficient_balance" {
 		t.Fail()
@@ -67,7 +55,8 @@ func TestAddBlock(t *testing.T) {
 		Balances: make(map[common.Address]uint),
 		dbFile:   f,
 	}
-	txn := getTestTxn(true)
+	state.Balances[common.NewAddress(test_helper.Test_Address_1)] = 100
+	txn := getTestTxn()
 
 	block := NewBlock(
 		state.latestBlockHash,

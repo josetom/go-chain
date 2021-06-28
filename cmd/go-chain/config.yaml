@@ -11,7 +11,7 @@ node:
     tickerDuration: 10
   miner:
     tickerDuration: 10
-    address: "0x3030303030303030303030303030303030303030"
+    address: "0x38c4ce5b96044e7ddd9ad95947178ed3436a4539"
   isBootstrap: false
   bootstrapNodes:
     -  host: "http://127.0.0.1:8600"
@@ -19,3 +19,5 @@ node:
     protocol: "http"
     host: "http://127.0.0.1:8600"
     port: 8600
+wallet:
+  datadir: "~/pet-project/blockchain/.database"

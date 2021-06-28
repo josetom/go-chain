@@ -62,28 +62,31 @@ func (n *Node) Run(ctx context.Context) error {
 	go n.sync(ctx)
 	go n.miner.mainLoop(ctx)
 
-	http.HandleFunc(RequestBalances, func(rw http.ResponseWriter, r *http.Request) {
+	handler := http.NewServeMux()
+
+	handler.HandleFunc(RequestBalances, func(rw http.ResponseWriter, r *http.Request) {
 		balancesHandler(rw, r, n)
 	})
 
-	http.HandleFunc(RequestTransactions, func(rw http.ResponseWriter, r *http.Request) {
+	handler.HandleFunc(RequestTransactions, func(rw http.ResponseWriter, r *http.Request) {
 		transactionsHandler(rw, r, n)
 	})
 
-	http.HandleFunc(RequestNodeStatus, func(rw http.ResponseWriter, r *http.Request) {
+	handler.HandleFunc(RequestNodeStatus, func(rw http.ResponseWriter, r *http.Request) {
 		nodeStatusHandler(rw, r, n)
 	})
 
-	http.HandleFunc(RequestNodeSync, func(rw http.ResponseWriter, r *http.Request) {
+	handler.HandleFunc(RequestNodeSync, func(rw http.ResponseWriter, r *http.Request) {
 		nodeSyncHandler(rw, r, n)
 	})
 
-	http.HandleFunc(RequestAddPeers, func(rw http.ResponseWriter, r *http.Request) {
+	handler.HandleFunc(RequestAddPeers, func(rw http.ResponseWriter, r *http.Request) {
 		nodePeersHandler(rw, r, n)
 	})
 
 	server := http.Server{
-		Addr: fmt.Sprintf(":%v", Config.Http.Port),
+		Addr:    fmt.Sprintf(":%v", Config.Http.Port),
+		Handler: handler,
 	}
 
 	go func() {

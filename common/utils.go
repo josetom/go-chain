@@ -9,6 +9,7 @@ import (
 )
 
 // Converts bytes to sha256 hash
+// TODO : convert to sha3
 func BytesToHash(b []byte) Hash {
 	return sha256.Sum256(b)
 }

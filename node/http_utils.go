@@ -43,7 +43,7 @@ func writeRes(w http.ResponseWriter, content interface{}) {
 	w.Write(contentJson)
 }
 
-func readRes(r *http.Response, reqBody interface{}) error {
+func ReadRes(r *http.Response, reqBody interface{}) error {
 	reqBodyJson, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return fmt.Errorf("unable to read response body. %s", err.Error())

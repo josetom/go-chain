@@ -17,16 +17,20 @@ const (
 	Address_100_with_extra_2_zeroes_prefixed  = "0000000000000000000100"
 	Address_100_with_extra_2_numbers_prefixed = "1200000000000000000100"
 
+	Test_Address_1 = "0xdd6b4d532aad2814bf5ea2bcc5e8939294857e6c"
+	Test_Address_2 = "0x054b08ac0c3233efe965a6f24071de1353955e59"
+
 	Hash_0x = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-	Hash_Block_0 = "0x49fcfda04bf1fa758e3bd1419c6d41af962c785982af36b6ffa8c0959c51efb0"
-	Hash_Block_1 = "0x4ad74d1283563d60fde33eefa8b08bcaf9c3fef1813d0c71007147d9c3dd12c0"
+	Hash_Block_0 = "0xc0c869808bc0aaf964341f9f59b49b9b67ccc52997a6a5bc72c0fd6b648a26f0"
+	Hash_Block_1 = "0xe8db397923f5d4cdc605308b5c5a4097fce898b71359a7f61beb74e784d12580"
 
-	Hash_Txn_100_Reward   = "0x81d2c4a516ec000d4080a36e4abbbdeb2c2d47952f32be97e8316530ab569e9c"
-	Hash_Block_100_Reward = "0x198ad94ce7b309e120977398a8f205645e1939020ad65c10a2b72dce0005ee9f"
+	Hash_Txn_100_Reward   = "0x6e6cdf6ae97854dcf5111f3aab286aed4efd49355b5d8f46c76472f1a03abbd7"
+	Hash_Block_100_Reward = "0xb9172dc5d46b4c8c3bab36bad278f96130d8d61ccba19506865fad00229b54d6"
 
-	REWARD     = "reward"
 	DUMMY_DATA = "something else"
+
+	WALLET_PWD = "wallet_pwd"
 )
 
 var Address_100_as_Bytes = []byte(Address_100)

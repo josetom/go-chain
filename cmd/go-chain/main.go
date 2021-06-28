@@ -29,6 +29,7 @@ func main() {
 	cmd.AddCommand(configCmd)
 	cmd.AddCommand(balancesCmd())
 	cmd.AddCommand(txCmd())
+	cmd.AddCommand(walletCmd())
 
 	err := cmd.Execute()
 	if err != nil {

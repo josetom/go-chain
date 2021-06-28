@@ -75,8 +75,6 @@ func (s *State) loadStateFromDisk() (*State, error) {
 		var blockFS BlockFS
 		json.Unmarshal(blockFsJson, &blockFS)
 
-		log.Println(blockFS.Block.Hash())
-
 		if err := s.applyBlock(blockFS.Block); err != nil {
 			return nil, err
 		}
@@ -110,14 +108,24 @@ func (s *State) applyBlock(b Block) error {
 		return fmt.Errorf("invalid block hash %x", blockHash)
 	}
 
-	return s.applyTransactions(b.Transactions)
+	err = s.applyTransactions(b.Transactions)
+	if err != nil {
+		return err
+	}
+
+	s.Balances[b.Header.Miner] += uint(Config.Block.Reward)
+
+	return nil
 }
 
 // Validate current balances and update the balances
 func (s *State) applyTransaction(tx Transaction) error {
-	if tx.TxnContent.IsReward {
-		s.Balances[tx.To()] += tx.Value()
-		return nil
+	isAuthentic, err := tx.IsAuthentic()
+	if !isAuthentic {
+		return fmt.Errorf("not_authentic")
+	}
+	if err != nil {
+		return err
 	}
 	if s.Balances[tx.From()] < tx.Value() {
 		return fmt.Errorf("insufficient_balance")

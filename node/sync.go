@@ -33,6 +33,10 @@ func (n *Node) doSync() {
 			continue
 		}
 
+		if peer.Host == "" {
+			continue
+		}
+
 		log.Printf("Searching for new Peers and their Blocks and Peers: '%s'\n", peer.Host)
 
 		status, err := queryPeerStatus(peer)
@@ -150,7 +154,7 @@ func (n *Node) joinKnownPeer(peer PeerNode) error {
 	}
 
 	addPeerRes := NodeAddPeerRes{}
-	err = readRes(res, &addPeerRes)
+	err = ReadRes(res, &addPeerRes)
 	if err != nil {
 		return err
 	}
@@ -179,7 +183,7 @@ func queryPeerStatus(peer PeerNode) (NodeStatusRes, error) {
 	}
 
 	statusRes := NodeStatusRes{}
-	err = readRes(res, &statusRes)
+	err = ReadRes(res, &statusRes)
 	if err != nil {
 		return NodeStatusRes{}, err
 	}
@@ -203,7 +207,7 @@ func fetchBlocksFromPeer(peer PeerNode, hash common.Hash) ([]core.Block, error) 
 	}
 
 	syncRes := NodeSyncRes{}
-	err = readRes(res, &syncRes)
+	err = ReadRes(res, &syncRes)
 	if err != nil {
 		return nil, err
 	}

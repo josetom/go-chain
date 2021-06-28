@@ -2,9 +2,11 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/wallet"
 )
 
 type TransactionData struct {
@@ -17,12 +19,12 @@ type TransactionData struct {
 type TransactionContent struct {
 	TxnData   TransactionData `json:"txnData"`
 	Timestamp uint64          `json:"timestamp"`
-	IsReward  bool            `json:"isReward"`
 }
 
 type Transaction struct {
 	TxnContent TransactionContent `json:"txnContent"`
 	TxnHash    common.Hash        `json:"txnhHsh"`
+	Signature  common.Signature   `json:"signature"`
 }
 
 func NewTransaction(from common.Address, to common.Address, value uint, data string) Transaction {
@@ -34,11 +36,17 @@ func NewTransaction(from common.Address, to common.Address, value uint, data str
 		},
 	}
 	txn.hash()
+	// TODO : check when to sign
+	txn.Sign()
 	return txn
 }
 
+func (t *Transaction) Encode() ([]byte, error) {
+	return json.Marshal(t.TxnContent)
+}
+
 func (t *Transaction) hash() error {
-	bytes, err := json.Marshal(t.TxnContent)
+	bytes, err := t.Encode()
 	if err == nil {
 		t.TxnHash = common.BytesToHash(bytes)
 		return nil
@@ -65,4 +73,37 @@ func (t *Transaction) Value() uint {
 
 func (t *Transaction) Data() string {
 	return t.TxnContent.TxnData.Data
+}
+
+func (t *Transaction) WithSignature(signature common.Signature) {
+	t.Signature = signature
+}
+
+func (t *Transaction) IsAuthentic() (bool, error) {
+	txnBytes, err := t.Encode()
+	if err != nil {
+		return false, err
+	}
+	recoveredAddr, err := wallet.VerifyAndRecoverAccount(txnBytes, t.Signature)
+	if err != nil {
+		return false, err
+	}
+	if !recoveredAddr.Equal(t.From()) {
+		return false, fmt.Errorf("singnature doesn't match of sender")
+	}
+	return true, nil
+}
+
+func (t *Transaction) Sign() error {
+	txnBytes, err := t.Encode()
+	if err != nil {
+		return err
+	}
+	// TODO : password needs to be changed
+	sig, err := wallet.SignForAddress(txnBytes, t.From(), "wallet_pwd")
+	if err != nil {
+		return err
+	}
+	t.WithSignature(sig)
+	return nil
 }
