@@ -17,8 +17,8 @@ func GetTestTxn(isReward bool) core.Transaction {
 	}
 
 	txn := core.NewTransaction(
-		common.NewAddress(test_helper.Address_0_with_0x),
-		common.NewAddress(test_helper.Address_100_Hex_with_0x),
+		common.NewAddress(test_helper.Test_Address_1),
+		common.NewAddress(test_helper.Test_Address_2),
 		100,
 		data,
 	)

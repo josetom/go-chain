@@ -33,6 +33,10 @@ func (n *Node) doSync() {
 			continue
 		}
 
+		if peer.Host == "" {
+			continue
+		}
+
 		log.Printf("Searching for new Peers and their Blocks and Peers: '%s'\n", peer.Host)
 
 		status, err := queryPeerStatus(peer)

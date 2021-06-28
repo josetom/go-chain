@@ -19,3 +19,5 @@ node:
     protocol: "http"
     host: "http://127.0.0.1:8600"
     port: 8600
+wallet:
+  datadir: "~/pet-project/blockchain/.database"

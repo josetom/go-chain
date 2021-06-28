@@ -1,14 +1,19 @@
 package common
 
 import (
+	"crypto/elliptic"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 // Converts bytes to sha256 hash
+// TODO : convert to sha3
 func BytesToHash(b []byte) Hash {
 	return sha256.Sum256(b)
 }
@@ -76,4 +81,17 @@ func DeepCopy(src interface{}, dst interface{}) {
 func GenNonce() uint64 {
 	rand.Seed(time.Now().UnixNano())
 	return uint64(rand.Int63())
+}
+
+func VerifyAndRecoverAccount(msg []byte, signature Signature) (Address, error) {
+	msgHash := BytesToHash(msg)
+	recoveredPubKey, err := crypto.SigToPub(msgHash.Bytes(), signature.Bytes())
+	if err != nil {
+		return Address{}, fmt.Errorf("unable to verify signature. %s", err.Error())
+	}
+	recoveredPubKeyBytes := elliptic.Marshal(crypto.S256(), recoveredPubKey.X, recoveredPubKey.Y)
+	recoveredPubKeyBytesHash := crypto.Keccak256(recoveredPubKeyBytes[1:])
+	recoveredAccount := BytesToAddress(recoveredPubKeyBytesHash[12:])
+
+	return recoveredAccount, nil
 }

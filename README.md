@@ -21,11 +21,9 @@ A simple blockchain built with inspiration from geth
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
     - Persist to leveldb
-- Blocks
-    - Change the current state persistance to mining based approach
 - Node
     - Sync should happen only after the blocks are synced first time
-- Create Wallet
+- Wallets
 - Websockets
 - Coinbase (miner account) should be set in genesis file
 - ...??

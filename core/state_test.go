@@ -18,7 +18,7 @@ func TestLoadStateValid(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	if state.Balances[common.NewAddress(test_helper.Address_100_Hex_with_0x)] != 200 {
+	if state.Balances[common.NewAddress(test_helper.Test_Address_2)] != 200 {
 		t.Fail()
 	}
 }

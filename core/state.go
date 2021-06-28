@@ -75,8 +75,6 @@ func (s *State) loadStateFromDisk() (*State, error) {
 		var blockFS BlockFS
 		json.Unmarshal(blockFsJson, &blockFS)
 
-		log.Println(blockFS.Block.Hash())
-
 		if err := s.applyBlock(blockFS.Block); err != nil {
 			return nil, err
 		}

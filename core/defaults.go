@@ -3,7 +3,6 @@ package core
 import (
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/constants"
-	"github.com/josetom/go-chain/test_helper"
 )
 
 func Defaults() CoreConfig {
@@ -28,6 +27,6 @@ var defaultGenesis = Genesis{
 
 func getDefaultGenesisBalances() map[common.Address]uint {
 	var defaultGenesisBalances = make(map[common.Address]uint)
-	defaultGenesisBalances[common.NewAddress(test_helper.Address_0_with_0x)] = 1000000000
+	defaultGenesisBalances[common.ZeroAddress] = 1000000000
 	return defaultGenesisBalances
 }
