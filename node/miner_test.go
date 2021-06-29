@@ -31,12 +31,11 @@ func TestMine(t *testing.T) {
 		t.Fail()
 	}
 
-	blockHash, err := block.Hash()
+	isBlockValid, err := block.IsBlockHashValid()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
-
-	if !core.IsBlockHashValid(blockHash) {
+	if !isBlockValid {
 		t.Fail()
 	}
 

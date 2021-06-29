@@ -43,14 +43,18 @@ func writeRes(w http.ResponseWriter, content interface{}) {
 	w.Write(contentJson)
 }
 
-func ReadRes(r *http.Response, reqBody interface{}) error {
-	reqBodyJson, err := ioutil.ReadAll(r.Body)
+func ReadRes(r *http.Response, resBody interface{}) error {
+	resBodyJson, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return fmt.Errorf("unable to read response body. %s", err.Error())
 	}
 	defer r.Body.Close()
 
-	err = json.Unmarshal(reqBodyJson, reqBody)
+	if r.StatusCode != http.StatusOK {
+		return fmt.Errorf("unable to unmarshal response body. %s", string(resBodyJson))
+	}
+
+	err = json.Unmarshal(resBodyJson, resBody)
 	if err != nil {
 		return fmt.Errorf("unable to unmarshal response body. %s", err.Error())
 	}

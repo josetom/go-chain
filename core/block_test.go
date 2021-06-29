@@ -11,7 +11,16 @@ import (
 
 func TestBlockHash(t *testing.T) {
 	txn := getTestTxn()
-	block := NewBlock(common.Hash{}, 0, uint64(time.Time{}.UnixNano()), 0, common.Address{}, []Transaction{txn})
+	block := NewBlock(
+		common.Hash{},
+		0,
+		uint64(time.Time{}.UnixNano()),
+		0,
+		common.Address{},
+		MINING_ALGO_POW,
+		uint64(Config.Block.Reward),
+		[]Transaction{txn},
+	)
 	blockHash, err := block.Hash()
 	if blockHash.String() != test_helper.Hash_Block_100_Reward || err != nil {
 		log.Println(blockHash)
@@ -20,23 +29,30 @@ func TestBlockHash(t *testing.T) {
 }
 
 func TestIsBlockHashValid(t *testing.T) {
-	if !IsBlockHashValid(common.Hash{}) {
+
+	// invalid block
+	block1, err := getTestBlock(false, &State{}, []Transaction{})
+	if err != nil {
+		t.Error(err)
+	}
+	isBlockValid1, err := block1.IsBlockHashValid()
+	if err != nil {
+		t.Error(err)
+	}
+	if isBlockValid1 {
 		t.Fail()
 	}
 
-	// Last Config.Block.Complexity bytes are number 0 => FAIL
-	h1 := common.Hash{}
-	h1.UnmarshalText([]byte("0xf572455bfe4edc8964b3197d07d1f27c6dc16cfaf250fbdc7eaa363030303033"))
-	if IsBlockHashValid(h1) {
-		log.Println(h1)
-		t.Fail()
+	// valid block
+	block2, err := getTestBlock(true, &State{}, []Transaction{})
+	if err != nil {
+		t.Error(err)
 	}
-
-	// last 5 chars of hex string are 0 => SUCCESS
-	h2 := common.Hash{}
-	h2.UnmarshalText([]byte("0xf572455bfe4edc8964b3197d07d1f27c6dc16cfaf250fbdc7eaa36abcde00000"))
-	if !IsBlockHashValid(h2) {
-		log.Println(h2)
+	isBlockValid2, err := block2.IsBlockHashValid()
+	if err != nil {
+		t.Error(err)
+	}
+	if !isBlockValid2 {
 		t.Fail()
 	}
 }

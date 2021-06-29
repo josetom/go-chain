@@ -104,7 +104,12 @@ func (s *State) applyBlock(b Block) error {
 		return err
 	}
 
-	if !IsBlockHashValid(blockHash) {
+	isBlockValid, err := b.IsBlockHashValid()
+	if err != nil {
+		return err
+	}
+
+	if !isBlockValid {
 		return fmt.Errorf("invalid block hash %x", blockHash)
 	}
 
@@ -113,7 +118,7 @@ func (s *State) applyBlock(b Block) error {
 		return err
 	}
 
-	s.Balances[b.Header.Miner] += uint(Config.Block.Reward)
+	s.Balances[b.Header.Miner] += uint(b.Header.Reward)
 
 	return nil
 }

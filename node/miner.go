@@ -111,6 +111,8 @@ func (m *Miner) mine(ctx context.Context) (core.Block, error) {
 		uint64(time.Now().UnixNano()),
 		common.GenNonce(),
 		Config.Miner.Address,
+		core.MINING_ALGO_POW,
+		uint64(core.Config.Block.Reward),
 		txnArr,
 	)
 
@@ -142,11 +144,11 @@ func (m *Miner) mineBlockHelper(ctx context.Context, pendingBlock core.Block) (c
 		return core.Block{}, fmt.Errorf("mining cancelled for block : %d", pendingBlock.Header.Number)
 	default:
 	}
-	hash, err := pendingBlock.Hash()
+	isBlockValid, err := pendingBlock.IsBlockHashValid()
 	if err != nil {
 		return core.Block{}, err
 	}
-	if core.IsBlockHashValid(hash) {
+	if isBlockValid {
 		return pendingBlock, nil
 	}
 	pendingBlock.Header.Nonce = common.GenNonce()

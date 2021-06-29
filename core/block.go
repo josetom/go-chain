@@ -8,17 +8,22 @@ import (
 	"github.com/josetom/go-chain/common"
 )
 
+const MINING_ALGO_POW = "pow"
+
 type Block struct {
 	Header       BlockHeader   `json:"header"`
 	Transactions []Transaction `json:"transactions"`
 }
 
 type BlockHeader struct {
-	ParentHash common.Hash    `json:"parentHash"`
-	Timestamp  uint64         `json:"timestamp"`
-	Number     uint64         `json:"number"`
-	Nonce      uint64         `json:"nonce"`
-	Miner      common.Address `json:"miner"`
+	ParentHash       common.Hash    `json:"parentHash"`
+	Timestamp        uint64         `json:"timestamp"`
+	Number           uint64         `json:"number"`
+	Nonce            uint64         `json:"nonce"`
+	Miner            common.Address `json:"miner"`
+	MiningAlgo       string         `json:"miningAlgo"`
+	MiningComplexity uint64         `json:"miningComplexity"`
+	Reward           uint64         `json:"reward"`
 }
 
 type BlockFS struct {
@@ -26,14 +31,26 @@ type BlockFS struct {
 	Block Block       `json:"block"`
 }
 
-func NewBlock(parentHash common.Hash, number uint64, time uint64, nonce uint64, miner common.Address, transactions []Transaction) Block {
+func NewBlock(
+	parentHash common.Hash,
+	number uint64,
+	time uint64,
+	nonce uint64,
+	miner common.Address,
+	miningAlgo string,
+	reward uint64,
+	transactions []Transaction,
+) Block {
 	return Block{
 		BlockHeader{
-			ParentHash: parentHash,
-			Timestamp:  time,
-			Number:     number,
-			Nonce:      nonce,
-			Miner:      miner,
+			ParentHash:       parentHash,
+			Timestamp:        time,
+			Number:           number,
+			Nonce:            nonce,
+			Miner:            miner,
+			MiningAlgo:       miningAlgo,
+			MiningComplexity: Config.Block.Complexity,
+			Reward:           reward,
 		},
 		transactions,
 	}
@@ -51,8 +68,12 @@ func (b Block) IsEmpty() bool {
 	return len(b.Transactions) == 0
 }
 
-func IsBlockHashValid(hash common.Hash) bool {
-	fmt_s := "%0" + fmt.Sprint(Config.Block.Complexity) + "d"
+func (b Block) IsBlockHashValid() (bool, error) {
+	hash, err := b.Hash()
+	if err != nil {
+		return false, err
+	}
+	fmt_s := "%0" + fmt.Sprint(b.Header.MiningComplexity) + "d"
 	s := fmt.Sprintf(fmt_s, 0) // if complexity = 5; generates "00000"
-	return strings.HasSuffix(hash.String(), s)
+	return strings.HasPrefix(hash.String()[2:], s), nil
 }

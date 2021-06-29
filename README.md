@@ -24,8 +24,8 @@ A simple blockchain built with inspiration from geth
 - Node
     - Sync should happen only after the blocks are synced first time
 - Websockets
-- Dynaminc mining difficulty and block reward
 - Import private key
+- Concurrency checks
 - ...??
 - Fix TODO comments
 # Development
@@ -45,8 +45,8 @@ go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length
 ## If you want to view database files
 ```sh
 mkdir .database
-cd ~/Libaray/go-chain
-ln -s ../../pet-project/blockchain/.database/database database
+cd ~/Libaray
+ln -s ../../pet-project/blockchain/.database go-chain
 ```
 
 # Demo
