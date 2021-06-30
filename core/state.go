@@ -104,7 +104,12 @@ func (s *State) applyBlock(b Block) error {
 		return err
 	}
 
-	if !IsBlockHashValid(blockHash) {
+	isBlockValid, err := b.IsBlockHashValid()
+	if err != nil {
+		return err
+	}
+
+	if !isBlockValid {
 		return fmt.Errorf("invalid block hash %x", blockHash)
 	}
 
@@ -113,7 +118,7 @@ func (s *State) applyBlock(b Block) error {
 		return err
 	}
 
-	s.Balances[b.Header.Miner] += uint(Config.Block.Reward)
+	s.Balances[b.Header.Miner] += uint(b.Header.Reward)
 
 	return nil
 }
@@ -127,10 +132,10 @@ func (s *State) applyTransaction(tx Transaction) error {
 	if err != nil {
 		return err
 	}
-	if s.Balances[tx.From()] < tx.Value() {
+	if s.Balances[tx.From()] < tx.Cost() {
 		return fmt.Errorf("insufficient_balance")
 	}
-	s.Balances[tx.From()] -= tx.Value()
+	s.Balances[tx.From()] -= tx.Cost()
 	s.Balances[tx.To()] += tx.Value()
 
 	return nil

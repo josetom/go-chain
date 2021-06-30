@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/fs"
@@ -58,16 +57,7 @@ func TestAddBlock(t *testing.T) {
 	state.Balances[common.NewAddress(test_helper.Test_Address_1)] = 100
 	txn := getTestTxn()
 
-	block := NewBlock(
-		state.latestBlockHash,
-		state.NextBlockNumber(),
-		uint64(time.Now().UnixNano()),
-		0,
-		common.NewAddress(""), // miner.Config.Address
-		[]Transaction{txn},
-	)
-
-	validBlock, err := mineBlockHelper(block)
+	validBlock, err := getTestBlock(true, state, []Transaction{txn})
 	if err != nil {
 		print(err)
 		t.Fail()

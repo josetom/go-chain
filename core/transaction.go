@@ -18,12 +18,13 @@ type TransactionData struct {
 
 type TransactionContent struct {
 	TxnData   TransactionData `json:"txnData"`
+	TxnFee    uint            `json:"txnFee"`
 	Timestamp uint64          `json:"timestamp"`
 }
 
 type Transaction struct {
 	TxnContent TransactionContent `json:"txnContent"`
-	TxnHash    common.Hash        `json:"txnhHsh"`
+	TxnHash    common.Hash        `json:"txnHash"`
 	Signature  common.Signature   `json:"signature"`
 }
 
@@ -32,6 +33,7 @@ func NewTransaction(from common.Address, to common.Address, value uint, data str
 	txn := Transaction{
 		TxnContent: TransactionContent{
 			TxnData:   txnData,
+			TxnFee:    getTxnFee(value),
 			Timestamp: uint64(time.Now().UnixNano()),
 		},
 	}
@@ -75,6 +77,14 @@ func (t *Transaction) Data() string {
 	return t.TxnContent.TxnData.Data
 }
 
+func (t *Transaction) Fee() uint {
+	return t.TxnContent.TxnFee
+}
+
+func (t *Transaction) Cost() uint {
+	return t.Value() + t.Fee()
+}
+
 func (t *Transaction) WithSignature(signature common.Signature) {
 	t.Signature = signature
 }
@@ -106,4 +116,13 @@ func (t *Transaction) Sign() error {
 	}
 	t.WithSignature(sig)
 	return nil
+}
+
+// TODO : refine this logic
+func getTxnFee(value uint) uint {
+	if value > 1000 {
+		return 10
+	} else {
+		return 0
+	}
 }

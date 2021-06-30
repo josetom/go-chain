@@ -11,7 +11,7 @@ func Defaults() CoreConfig {
 			DbFile: "state.db",
 		},
 		Block: BlockConfig{
-			Reward:     100,
+			Reward:     100, // TODO : To be validated
 			Complexity: 1,
 		},
 	}

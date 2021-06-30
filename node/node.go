@@ -98,7 +98,7 @@ func (n *Node) Run(ctx context.Context) error {
 	}()
 
 	log.Println("starting server in : ", Config.Http.Port)
-	return server.ListenAndServe()
+	return server.ListenAndServe() // TODO : Handle https, grpc
 }
 
 func (n *Node) AddPeer(peer PeerNode) {

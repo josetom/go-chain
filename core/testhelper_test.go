@@ -8,11 +8,11 @@ import (
 )
 
 func mineBlockHelper(pendingBlock Block) (Block, error) {
-	hash, err := pendingBlock.Hash()
+	isBlockValid, err := pendingBlock.IsBlockHashValid()
 	if err != nil {
 		return Block{}, err
 	}
-	if IsBlockHashValid(hash) {
+	if isBlockValid {
 		return pendingBlock, nil
 	}
 	pendingBlock.Header.Nonce = common.GenNonce()
@@ -33,4 +33,23 @@ func getTestTxn() Transaction {
 	txn.Hash()
 	txn.Sign()
 	return txn
+}
+
+func getTestBlock(isValid bool, state *State, txns []Transaction) (Block, error) {
+	block := NewBlock(
+		state.latestBlockHash,
+		state.NextBlockNumber(),
+		uint64(time.Time{}.UnixNano()),
+		0,
+		common.NewAddress(""), // miner.Config.Address
+		MINING_ALGO_POW,
+		uint64(Config.Block.Reward),
+		txns,
+	)
+
+	if isValid {
+		return mineBlockHelper(block)
+	} else {
+		return block, nil
+	}
 }

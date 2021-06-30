@@ -13,6 +13,8 @@ import (
 )
 
 func (n *Node) sync(ctx context.Context) error {
+	n.doSync()
+
 	tickerDuration := time.Duration(Config.Sync.TickerDuration)
 	ticker := time.NewTicker(tickerDuration * time.Second)
 

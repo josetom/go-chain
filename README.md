@@ -16,16 +16,20 @@ A simple blockchain built with inspiration from geth
     - Sync
 - Wallets
 ### Todo
-- Transactions
-    - Block txn from zero address
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
     - Persist to leveldb
-- Node
-    - Sync should happen only after the blocks are synced first time
 - Websockets
-- Dynaminc mining difficulty and block reward
-- Import private key
+- GRPC
+- Concurrency checks
+- Misc items
+    - Transactions
+        - Block txn from zero address
+    - Wallet
+        - Import private key
+    - Node
+        - Node Version
+        - Sync should happen only after the blocks are synced first time
 - ...??
 - Fix TODO comments
 # Development
@@ -45,8 +49,8 @@ go tool cover -func coverage.out | grep total | awk '{print substr($3, 1, length
 ## If you want to view database files
 ```sh
 mkdir .database
-cd ~/Libaray/go-chain
-ln -s ../../pet-project/blockchain/.database/database database
+cd ~/Libaray
+ln -s ../../pet-project/blockchain/.database go-chain
 ```
 
 # Demo

@@ -21,22 +21,22 @@ type Miner struct {
 	archivedTxns map[string]core.Transaction
 	pendingTxns  map[string]core.Transaction
 
-	currentState  *core.State
-	snapshotState *core.State
+	state        *core.State
+	pendingState *core.State
 
 	isMining bool
 }
 
 func InitMiner(state *core.State) Miner {
-	snapshotState := state.Copy()
+	pendingState := state.Copy()
 
 	miner := Miner{
-		txnsCh:        make(chan core.Transaction, txnChSize),
-		syncBlockCh:   make(chan core.Block, txnChSize),
-		currentState:  state,
-		snapshotState: &snapshotState,
-		pendingTxns:   make(map[string]core.Transaction),
-		archivedTxns:  make(map[string]core.Transaction),
+		txnsCh:       make(chan core.Transaction, txnChSize),
+		syncBlockCh:  make(chan core.Block, txnChSize),
+		state:        state,
+		pendingState: &pendingState,
+		pendingTxns:  make(map[string]core.Transaction),
+		archivedTxns: make(map[string]core.Transaction),
 	}
 
 	return miner
@@ -89,6 +89,7 @@ func (m *Miner) addPendingTxn(txn core.Transaction) {
 	_, isArchived := m.archivedTxns[txn.Hash().String()]
 
 	if !isAlreadyPending || isArchived {
+		m.pendingState.AddTransaction(txn)
 		m.pendingTxns[txn.Hash().String()] = txn
 	}
 }
@@ -99,18 +100,17 @@ func (m *Miner) mine(ctx context.Context) (core.Block, error) {
 		return core.Block{}, nil
 	}
 
-	snapshotState := m.currentState.Copy()
-	m.snapshotState = &snapshotState
-
 	txnArr := make([]core.Transaction, lenPendingTxns)
 	common.DeepCopy(txnMapToArray(m.pendingTxns), &txnArr)
 
 	pendingBlock := core.NewBlock(
-		m.currentState.LatestBlockHash(),
-		m.currentState.NextBlockNumber(),
+		m.pendingState.LatestBlockHash(),
+		m.pendingState.NextBlockNumber(),
 		uint64(time.Now().UnixNano()),
 		common.GenNonce(),
 		Config.Miner.Address,
+		core.MINING_ALGO_POW,
+		uint64(core.Config.Block.Reward),
 		txnArr,
 	)
 
@@ -119,12 +119,15 @@ func (m *Miner) mine(ctx context.Context) (core.Block, error) {
 		return core.Block{}, err
 	}
 
-	_, err = m.currentState.AddBlock(block)
+	m.removeMinedTxns(block)
+
+	_, err = m.state.AddBlock(block)
 	if err != nil {
 		return core.Block{}, err
 	}
 
-	m.removeMinedTxns(block)
+	pendingState := m.state.Copy()
+	m.pendingState = &pendingState
 
 	return block, err
 }
@@ -142,11 +145,11 @@ func (m *Miner) mineBlockHelper(ctx context.Context, pendingBlock core.Block) (c
 		return core.Block{}, fmt.Errorf("mining cancelled for block : %d", pendingBlock.Header.Number)
 	default:
 	}
-	hash, err := pendingBlock.Hash()
+	isBlockValid, err := pendingBlock.IsBlockHashValid()
 	if err != nil {
 		return core.Block{}, err
 	}
-	if core.IsBlockHashValid(hash) {
+	if isBlockValid {
 		return pendingBlock, nil
 	}
 	pendingBlock.Header.Nonce = common.GenNonce()
