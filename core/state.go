@@ -132,10 +132,10 @@ func (s *State) applyTransaction(tx Transaction) error {
 	if err != nil {
 		return err
 	}
-	if s.Balances[tx.From()] < tx.Value() {
+	if s.Balances[tx.From()] < tx.Cost() {
 		return fmt.Errorf("insufficient_balance")
 	}
-	s.Balances[tx.From()] -= tx.Value()
+	s.Balances[tx.From()] -= tx.Cost()
 	s.Balances[tx.To()] += tx.Value()
 
 	return nil
