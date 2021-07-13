@@ -5,19 +5,22 @@ import (
 	"testing"
 
 	"github.com/josetom/go-chain/core"
+	"github.com/josetom/go-chain/db"
 	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
 	"github.com/josetom/go-chain/test_helper/test_helper_core"
 )
 
 func TestMine(t *testing.T) {
+	db.Config.Type = db.LEVEL_DB
 	fs.Config.DataDir = test_helper.GetTestDataDir()
-	core.Config.State.DbFile = test_helper.CreateAndGetTestDbFile()
+	tempDbPath := test_helper.CreateAndGetTestDbFile()
+	core.Config.State.DbFile = tempDbPath
 
 	state, err := core.LoadState()
 
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 
 	txn := test_helper_core.GetTestTxn()
@@ -40,7 +43,8 @@ func TestMine(t *testing.T) {
 	}
 
 	cleanup := func() {
-		test_helper.DeleteTestDbFile()
+		state.Close()
+		test_helper.DeleteTestDbFile(tempDbPath)
 		core.Config.State.DbFile = core.Defaults().State.DbFile
 	}
 	t.Cleanup(cleanup)

@@ -22,6 +22,7 @@ A simple blockchain built with inspiration from geth
 - Websockets
 - GRPC
 - Concurrency checks
+- Proof of stake
 - Misc items
     - Transactions
         - Block txn from zero address

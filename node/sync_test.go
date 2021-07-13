@@ -1,15 +1,33 @@
 package node
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
+	"github.com/josetom/go-chain/db"
 	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
+	"github.com/josetom/go-chain/test_helper/test_helper_core"
 )
+
+var node Node = createDummmyNodeAndLoadState()
+var handlers *http.ServeMux
+
+func TestSync(t *testing.T) {
+	// node = createDummmyNodeAndLoadState()
+	handlers = node.registerHandlers()
+	httpClient = getDummyClient()
+
+	t.Run("testFetchBlocksFromPeer", testFetchBlocksFromPeer)
+	t.Run("testJoinKnownPeer", testJoinKnownPeer)
+	t.Run("testQueryPeerStatus", testQueryPeerStatus)
+
+	defer node.state.Close()
+}
 
 type RoundTripFunc func(req *http.Request) *http.Response
 
@@ -25,95 +43,131 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 	}
 }
 
-func getDummyClient(t *testing.T, handler HandlerFunc) *http.Client {
+func createDummmyNodeAndLoadState() Node {
+	db.Config.Type = db.LEVEL_DB
+	fs.Config.DataDir = test_helper.GetTestDataDir()
+	core.Config.State.DbFile = core.Defaults().State.DbFile
+
+	node := NewNode()
+	state, err := test_helper_core.GetTestState()
+	if err != nil {
+		log.Fatalln("sync_test loadstate failed \n", err)
+	}
+
+	node.state = state
+
+	return node
+
+}
+
+func getDummyClient() *http.Client {
 	return NewTestClient(func(req *http.Request) *http.Response {
-
-		node := NewNode()
-		state, err := core.LoadState()
-		if err != nil {
-			t.Error(err)
-		}
-		node.state = state
-
-		req, err = http.NewRequest(req.Method, req.URL.String(), req.Body)
-		if err != nil {
-			t.Error(err)
-		}
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			handler(rw, r, &node)
-		})
-		handler.ServeHTTP(rr, req)
+		req, err := http.NewRequest(req.Method, req.URL.String(), req.Body)
+		if err != nil {
+			writeErrRes(rr, err)
+			return rr.Result()
+		}
+
+		handlers.ServeHTTP(rr, req)
+
 		return rr.Result()
 	})
 }
 
-func TestFetchBlocksFromPeer(t *testing.T) {
+func testFetchBlocksFromPeer(t *testing.T) {
+	db.Config.Type = db.LEVEL_DB
 	fs.Config.DataDir = test_helper.GetTestDataDir()
+	tempDbPath := test_helper.CreateAndGetTestDbFile()
+	core.Config.State.DbFile = tempDbPath
 
 	node := NewNode()
 	peer := NewPeerNode(getDefaultBootstrapNodes()[0].Host, true, false)
-	httpClient = getDummyClient(t, nodeSyncHandler)
 
 	state, err := core.LoadState()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	node.state = state
 
 	blocks, err := fetchBlocksFromPeer(peer, common.Hash{})
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	if len(blocks) != 2 || err != nil {
 		hash, err := blocks[0].Hash()
-		if err != nil || hash.String() != test_helper.Hash_Block_0 {
+		if err != nil {
+			t.Error(err)
+		}
+		if hash.String() != test_helper.Hash_Block_0 {
 			t.Fail()
 		}
 	}
+
+	cleanup := func() {
+		state.Close()
+		test_helper.DeleteTestDbFile(tempDbPath)
+	}
+	t.Cleanup(cleanup)
 }
 
-func TestQueryPeerStatus(t *testing.T) {
+func testQueryPeerStatus(t *testing.T) {
+	db.Config.Type = db.LEVEL_DB
 	fs.Config.DataDir = test_helper.GetTestDataDir()
+	tempDbPath := test_helper.CreateAndGetTestDbFile()
+	core.Config.State.DbFile = tempDbPath
 
 	node := NewNode()
 	peer := NewPeerNode(getDefaultBootstrapNodes()[0].Host, true, false)
-	httpClient = getDummyClient(t, nodeStatusHandler)
 
 	state, err := core.LoadState()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	node.state = state
 
 	nodeStatusRes, err := queryPeerStatus(peer)
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	if nodeStatusRes.Hash.String() != test_helper.Hash_Block_1 {
-		t.Fail()
+		t.Error(nodeStatusRes.Hash.String())
 	}
+
+	cleanup := func() {
+		state.Close()
+		test_helper.DeleteTestDbFile(tempDbPath)
+	}
+	t.Cleanup(cleanup)
 }
 
-func TestJoinKnownPeer(t *testing.T) {
+func testJoinKnownPeer(t *testing.T) {
+	db.Config.Type = db.LEVEL_DB
 	fs.Config.DataDir = test_helper.GetTestDataDir()
+	tempDbPath := test_helper.CreateAndGetTestDbFile()
+	core.Config.State.DbFile = tempDbPath
 
 	node := NewNode()
 	peer := NewPeerNode(getDefaultBootstrapNodes()[0].Host, true, false)
-	httpClient = getDummyClient(t, nodePeersHandler)
 
 	state, err := core.LoadState()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	node.state = state
 
 	err = (&node).joinKnownPeer(peer)
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 
 	if !node.knownPeers[peer.Host].connected {
 		t.Fail()
 	}
+
+	cleanup := func() {
+		state.Close()
+		test_helper.DeleteTestDbFile(tempDbPath)
+	}
+	t.Cleanup(cleanup)
 }

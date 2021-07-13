@@ -2,7 +2,6 @@ package common
 
 import (
 	"bytes"
-	"log"
 	"testing"
 
 	"github.com/josetom/go-chain/test_helper"
@@ -49,7 +48,6 @@ func TestSetBytes(t *testing.T) {
 	h1.setBytes(ba)
 
 	if !h1.Equal(h3) {
-		log.Println(h1, h3)
-		t.Fail()
+		t.Error(h1, h3)
 	}
 }

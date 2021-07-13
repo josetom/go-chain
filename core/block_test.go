@@ -1,7 +1,6 @@
 package core
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -23,8 +22,7 @@ func TestBlockHash(t *testing.T) {
 	)
 	blockHash, err := block.Hash()
 	if blockHash.String() != test_helper.Hash_Block_100_Reward || err != nil {
-		log.Println(blockHash)
-		t.Fail()
+		t.Error(blockHash)
 	}
 }
 

@@ -19,12 +19,12 @@ func GetTestFile(p string) string {
 
 func CreateAndGetTestDbFile() string {
 	os.MkdirAll(GetTestFile("database/temp"), os.ModePerm)
-	os.Create(GetTestFile("database/temp/test.db"))
-	return "temp/test.db"
+	// os.Create(GetTestFile("database/temp/test.db"))
+	return "temp/test.db" // + fmt.Sprintf("%d", rand.Int())
 }
 
-func DeleteTestDbFile() {
-	err := os.Remove(GetTestFile("database/temp/test.db"))
+func DeleteTestDbFile(tempDbPath string) {
+	err := os.RemoveAll(GetTestFile(filepath.Join("database", tempDbPath))) // "database/temp/test.db"))
 	if err != nil {
 		log.Println(err)
 	}
