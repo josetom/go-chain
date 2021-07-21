@@ -62,31 +62,9 @@ func (n *Node) Run(ctx context.Context) error {
 	go n.sync(ctx)
 	go n.miner.mainLoop(ctx)
 
-	handler := http.NewServeMux()
-
-	handler.HandleFunc(RequestBalances, func(rw http.ResponseWriter, r *http.Request) {
-		balancesHandler(rw, r, n)
-	})
-
-	handler.HandleFunc(RequestTransactions, func(rw http.ResponseWriter, r *http.Request) {
-		transactionsHandler(rw, r, n)
-	})
-
-	handler.HandleFunc(RequestNodeStatus, func(rw http.ResponseWriter, r *http.Request) {
-		nodeStatusHandler(rw, r, n)
-	})
-
-	handler.HandleFunc(RequestNodeSync, func(rw http.ResponseWriter, r *http.Request) {
-		nodeSyncHandler(rw, r, n)
-	})
-
-	handler.HandleFunc(RequestAddPeers, func(rw http.ResponseWriter, r *http.Request) {
-		nodePeersHandler(rw, r, n)
-	})
-
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%v", Config.Http.Port),
-		Handler: handler,
+		Handler: n.registerHandlers(),
 	}
 
 	go func() {
@@ -112,4 +90,30 @@ func (n *Node) RemovePeer(peer PeerNode) {
 func (n *Node) IsKnownPeer(peer PeerNode) bool {
 	_, isKnownPeer := n.knownPeers[peer.Host]
 	return isKnownPeer
+}
+
+func (n *Node) registerHandlers() *http.ServeMux {
+	handler := http.NewServeMux()
+
+	handler.HandleFunc(RequestBalances, func(rw http.ResponseWriter, r *http.Request) {
+		balancesHandler(rw, r, n)
+	})
+
+	handler.HandleFunc(RequestTransactions, func(rw http.ResponseWriter, r *http.Request) {
+		transactionsHandler(rw, r, n)
+	})
+
+	handler.HandleFunc(RequestNodeStatus, func(rw http.ResponseWriter, r *http.Request) {
+		nodeStatusHandler(rw, r, n)
+	})
+
+	handler.HandleFunc(RequestNodeSync, func(rw http.ResponseWriter, r *http.Request) {
+		nodeSyncHandler(rw, r, n)
+	})
+
+	handler.HandleFunc(RequestAddPeers, func(rw http.ResponseWriter, r *http.Request) {
+		nodePeersHandler(rw, r, n)
+	})
+
+	return handler
 }

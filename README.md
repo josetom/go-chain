@@ -15,16 +15,20 @@ A simple blockchain built with inspiration from geth
     - Peers
     - Sync
 - Wallets
+- LevelDB
+    - Stores the blocks against hash
+    - Has an index to point block number against hash. Iterator is run on this index
 ### Todo
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
-    - Persist to leveldb
 - Websockets
 - GRPC
 - Concurrency checks
+- Proof of stake
 - Misc items
     - Transactions
         - Block txn from zero address
+        - Increment txn nonce for signer
     - Wallet
         - Import private key
     - Node

@@ -1,20 +1,19 @@
 package core
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 
 	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/db"
+	"github.com/josetom/go-chain/db/types"
 )
 
 type State struct {
 	Balances map[common.Address]uint
-
-	dbFile *os.File
+	db       types.Database
 
 	latestBlock     Block
 	latestBlockHash common.Hash
@@ -41,7 +40,6 @@ func LoadState() (*State, error) {
 
 	state := &State{
 		Balances:        balances,
-		dbFile:          nil,
 		latestBlock:     Block{},
 		latestBlockHash: genesisHash,
 	}
@@ -51,29 +49,19 @@ func LoadState() (*State, error) {
 
 // Load blocks from local db and validate
 func (s *State) loadStateFromDisk() (*State, error) {
-	dbPath := GetBlocksDbPath()
-	f, err := os.OpenFile(dbPath, os.O_APPEND|os.O_RDWR, 0600)
+	database, err := db.NewDatabase(GetBlocksDbPath())
 	if err != nil {
-		log.Print("unable to open db ", dbPath)
 		return nil, err
 	}
+	s.db = database
 
-	scanner := bufio.NewScanner(f)
-	s.dbFile = f
+	iter := s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(1), nil)
 
-	for scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			log.Print("error while scanning", err)
+	for iter.Next() {
+		blockFS, err := s.GetBlockWithHashBytes(iter.Value())
+		if err != nil {
 			return nil, err
 		}
-
-		blockFsJson := scanner.Bytes()
-		if len(blockFsJson) == 0 {
-			break
-		}
-
-		var blockFS BlockFS
-		json.Unmarshal(blockFsJson, &blockFS)
 
 		if err := s.applyBlock(blockFS.Block); err != nil {
 			return nil, err
@@ -177,9 +165,23 @@ func (s *State) AddBlock(block Block) (common.Hash, error) {
 	if err != nil {
 		return common.Hash{}, err
 	}
-	if _, err = s.dbFile.Write(append(blockFsJson, '\n')); err != nil {
+
+	blockKey := append([]byte(INDEX_BLOCK_HASH), blockHash.Bytes()...)
+	blockNumberIndex := append([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(block.Header.Number)...)
+
+	// add block and index to db
+	batch := s.db.NewBatch()
+	if err = batch.Put(blockNumberIndex, blockHash.Bytes()); err != nil {
 		return common.Hash{}, err
 	}
+
+	if err = batch.Put(blockKey, blockFsJson); err != nil {
+		return common.Hash{}, err
+	}
+	if err = batch.Write(); err != nil {
+		return common.Hash{}, err
+	}
+
 	log.Println("Block added", blockHash)
 
 	// Update the balances, block & hash to the current one
@@ -191,7 +193,7 @@ func (s *State) AddBlock(block Block) (common.Hash, error) {
 }
 
 func (s *State) Close() {
-	s.dbFile.Close()
+	s.db.Close()
 }
 
 func (s *State) LatestBlockHash() common.Hash {
@@ -217,4 +219,25 @@ func (s *State) Copy() State {
 	}
 
 	return c
+}
+
+func (s *State) GetBlock(blockHash common.Hash) (BlockFS, error) {
+	key := append([]byte(INDEX_BLOCK_HASH), blockHash.Bytes()...)
+	content, err := s.db.Get(key)
+	if err != nil {
+		return BlockFS{}, err
+	}
+
+	var blockFS *BlockFS
+	err = json.Unmarshal(content, &blockFS)
+	if err != nil {
+		return BlockFS{}, err
+	}
+	return *blockFS, nil
+}
+
+func (s *State) GetBlockWithHashBytes(hashBytes []byte) (BlockFS, error) {
+	var h common.Hash
+	h.SetBytes(hashBytes)
+	return s.GetBlock(h)
 }

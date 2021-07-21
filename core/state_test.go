@@ -1,46 +1,55 @@
-package core
+package core_test
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"os"
 	"testing"
 
 	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/core"
+	"github.com/josetom/go-chain/db"
 	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
+	"github.com/josetom/go-chain/test_helper/test_helper_core"
 )
 
 func TestLoadStateValid(t *testing.T) {
+	db.Config.Type = db.LEVEL_DB
 	fs.Config.DataDir = test_helper.GetTestDataDir()
-	state, err := LoadState()
+	state, err := test_helper_core.GetTestState()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	if state.Balances[common.NewAddress(test_helper.Test_Address_2)] != 200 {
 		t.Fail()
 	}
+	cleanup := func() {
+		state.Close()
+	}
+	t.Cleanup(cleanup)
 }
 
 func TestAddTransactionSuccess(t *testing.T) {
+	db.Config.Type = db.LEVEL_DB
 	fs.Config.DataDir = test_helper.GetTestDataDir()
-	state, err := LoadState()
+	state, err := test_helper_core.GetTestState()
 	if err != nil {
 		t.Fail()
 	}
-	txn := getTestTxn()
+	txn := test_helper_core.GetTestTxn()
 	err = state.AddTransaction(txn)
 	if err != nil {
 		t.Fail()
 	}
+	cleanup := func() {
+		state.Close()
+	}
+	t.Cleanup(cleanup)
 }
 
 func TestAddTransactionInsufficientBalance(t *testing.T) {
-	state := &State{
+	state := &core.State{
 		Balances: make(map[common.Address]uint),
-		dbFile:   nil,
 	}
-	txn := getTestTxn()
+	txn := test_helper_core.GetTestTxn()
 	err := state.AddTransaction(txn)
 	if err == nil || err.Error() != "insufficient_balance" {
 		t.Fail()
@@ -48,16 +57,19 @@ func TestAddTransactionInsufficientBalance(t *testing.T) {
 }
 
 func TestAddBlock(t *testing.T) {
-	f, _ := os.CreateTemp("", "persist.db") // Temp gives much better performance
-	// f, _ := os.Create(test_helper.GetTestFile("database/persist.db")) // Use this to debug if there are any failures
-	state := &State{
-		Balances: make(map[common.Address]uint),
-		dbFile:   f,
+	db.Config.Type = db.LEVEL_DB
+	fs.Config.DataDir = test_helper.GetTestDataDir()
+	tempDbPath := test_helper.CreateAndGetTestDbFile()
+	core.Config.State.DbFile = tempDbPath
+
+	state, err := core.LoadState()
+	if err != nil {
+		t.Error(err)
 	}
 	state.Balances[common.NewAddress(test_helper.Test_Address_1)] = 100
-	txn := getTestTxn()
+	txn := test_helper_core.GetTestTxn()
 
-	validBlock, err := getTestBlock(true, state, []Transaction{txn})
+	validBlock, err := test_helper_core.GetTestBlock(true, state, []core.Transaction{txn})
 	if err != nil {
 		print(err)
 		t.Fail()
@@ -70,12 +82,9 @@ func TestAddBlock(t *testing.T) {
 		t.Fail()
 	}
 
-	content, _ := ioutil.ReadFile(f.Name())
-
-	var blockFS *BlockFS
-	err = json.Unmarshal(content, &blockFS)
+	blockFS, err := state.GetBlock(blockHash)
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 
 	readBlockHash, err := blockFS.Block.Hash()
@@ -90,12 +99,17 @@ func TestAddBlock(t *testing.T) {
 	if blockFS.Block.Transactions[0] != txn {
 		t.Fail()
 	}
+
+	cleanup := func() {
+		state.Close()
+		test_helper.DeleteTestDbFile(tempDbPath)
+	}
+	t.Cleanup(cleanup)
 }
 
 func TestNextBlockNumber(t *testing.T) {
-	state := &State{
+	state := &core.State{
 		Balances: make(map[common.Address]uint),
-		dbFile:   nil,
 	}
 	if state.NextBlockNumber() != 1 {
 		t.Fail()

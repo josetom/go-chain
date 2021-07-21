@@ -2,7 +2,6 @@ package common
 
 import (
 	"bytes"
-	"log"
 	"testing"
 
 	"github.com/josetom/go-chain/test_helper"
@@ -46,10 +45,9 @@ func TestSetBytes(t *testing.T) {
 	// setting a dummy prefix
 	ba := make([]byte, HashLength+2)
 	copy(ba, []byte("as"))
-	h1.setBytes(ba)
+	h1.SetBytes(ba)
 
 	if !h1.Equal(h3) {
-		log.Println(h1, h3)
-		t.Fail()
+		t.Error(h1, h3)
 	}
 }

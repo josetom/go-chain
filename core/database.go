@@ -1,48 +1,34 @@
 package core
 
 import (
-	"bufio"
-	"encoding/json"
-	"os"
-	"reflect"
-
 	"github.com/josetom/go-chain/common"
+	"github.com/josetom/go-chain/db/types"
 )
 
 // TODO : this needs to be fixed and changed to query from leveldb
 func (s *State) GetBlocksAfter(hash common.Hash) ([]Block, error) {
-	f, err := os.OpenFile(GetBlocksDbPath(), os.O_RDONLY, 0600)
-	if err != nil {
-		return nil, err
-	}
 
 	blocks := make([]Block, 0)
-	shouldStartCollecting := false
 
-	if reflect.DeepEqual(hash, common.Hash{}) {
-		shouldStartCollecting = true
-	}
+	var iter types.Iterator
 
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			return nil, err
-		}
+	if hash.Equal(common.Hash{}) {
+		iter = s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(1), nil)
+	} else {
 
-		var blockFs BlockFS
-		err = json.Unmarshal(scanner.Bytes(), &blockFs)
+		blockFS, err := s.GetBlock(hash)
 		if err != nil {
 			return nil, err
 		}
 
-		if shouldStartCollecting {
-			blocks = append(blocks, blockFs.Block)
-			continue
+		iter = s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(blockFS.Block.Header.Number+1), nil)
+	}
+	for iter.Next() {
+		blockFS, err := s.GetBlockWithHashBytes(iter.Value())
+		if err != nil {
+			return nil, err
 		}
-
-		if hash == blockFs.Hash {
-			shouldStartCollecting = true
-		}
+		blocks = append(blocks, blockFS.Block)
 	}
 
 	return blocks, nil

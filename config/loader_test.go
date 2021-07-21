@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"testing"
 
 	"github.com/josetom/go-chain/common"
@@ -13,12 +12,10 @@ import (
 func TestLoadDefaults(t *testing.T) {
 	config := Load("")
 	if config.FS.DataDir != fs.Defaults().DataDir {
-		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
-		t.Fail()
+		t.Error("config.fs.DataDir -- ", config.FS.DataDir)
 	}
 	if config.Core.State.DbFile != core.Defaults().State.DbFile {
-		log.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
-		t.Fail()
+		t.Error("config.Core.State.DbFile -- ", config.Core.State.DbFile)
 	}
 	cleanup := func() {
 		common.DeepCopy(Defaults, config)
@@ -29,12 +26,10 @@ func TestLoadDefaults(t *testing.T) {
 func TestLoadValidFile(t *testing.T) {
 	config := Load(test_helper.GetTestFile("valid-config.yaml"))
 	if config.FS.DataDir != "dummy_dir" {
-		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
-		t.Fail()
+		t.Error("config.fs.DataDir -- ", config.FS.DataDir)
 	}
 	if config.Core.State.DbFile != "dummy_state_file" {
-		log.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
-		t.Fail()
+		t.Error("config.Core.State.DbFile -- ", config.Core.State.DbFile)
 	}
 	cleanup := func() {
 		common.DeepCopy(Defaults, config)
@@ -45,12 +40,10 @@ func TestLoadValidFile(t *testing.T) {
 func TestLoadPartialConfig(t *testing.T) {
 	config := Load(test_helper.GetTestFile("partial-config.yaml"))
 	if config.FS.DataDir != fs.Defaults().DataDir {
-		log.Println("config.fs.DataDir -- ", config.FS.DataDir)
-		t.Fail()
+		t.Error("config.fs.DataDir -- ", config.FS.DataDir)
 	}
 	if config.Core.State.DbFile != "dummy_state_file" {
-		log.Println("config.Core.State.DbFile -- ", config.Core.State.DbFile)
-		t.Fail()
+		t.Error("config.Core.State.DbFile -- ", config.Core.State.DbFile)
 	}
 	cleanup := func() {
 		common.DeepCopy(Defaults, config)

@@ -9,6 +9,13 @@ import (
 	"github.com/josetom/go-chain/fs"
 )
 
+type FsProvider interface {
+	InitFS() error
+	GetDataDir() string
+	GetGenesisFilePath() string
+	GetBlocksDbPath() string
+}
+
 func InitFS() error {
 	// Create Database directory if it doesn't exist
 	err := initializeDbDirectory()
@@ -66,9 +73,9 @@ func initializeGenesisFile() error {
 }
 
 func initializeBlockDb() error {
-	if isExist, _ := fs.DoesExist(GetBlocksDbPath()); !isExist {
-		err := fs.WriteEmptyBlocksDbToDisk(GetBlocksDbPath())
-		return err
-	}
+	// if isExist, _ := fs.DoesExist(GetBlocksDbPath()); !isExist {
+	// err := fs.WriteEmptyBlocksDbToDisk(GetBlocksDbPath())
+	// return err
+	// }
 	return nil
 }

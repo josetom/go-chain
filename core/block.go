@@ -8,8 +8,6 @@ import (
 	"github.com/josetom/go-chain/common"
 )
 
-const MINING_ALGO_POW = "pow"
-
 type Block struct {
 	Header       BlockHeader   `json:"header"`
 	Transactions []Transaction `json:"transactions"`

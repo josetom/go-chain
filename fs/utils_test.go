@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"log"
 	"testing"
 
 	"github.com/josetom/go-chain/test_helper"
@@ -9,8 +8,7 @@ import (
 
 func TestDoesExist(t *testing.T) {
 	if isExist, _ := DoesExist(test_helper.GetTestFile("valid.db")); !isExist {
-		log.Println(test_helper.GetTestFile("valid.db"))
-		t.Fail()
+		t.Error(test_helper.GetTestFile("valid.db"))
 	}
 	if isExist, _ := DoesExist(test_helper.GetTestFile("missing.db")); isExist {
 		t.Fail()
