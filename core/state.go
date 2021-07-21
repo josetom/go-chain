@@ -55,11 +55,13 @@ func (s *State) loadStateFromDisk() (*State, error) {
 	}
 	s.db = database
 
-	iter := s.db.NewIterator(nil, nil)
+	iter := s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(1), nil)
 
 	for iter.Next() {
-		var blockFS BlockFS
-		json.Unmarshal(iter.Value(), &blockFS)
+		blockFS, err := s.GetBlockWithHashBytes(iter.Value())
+		if err != nil {
+			return nil, err
+		}
 
 		if err := s.applyBlock(blockFS.Block); err != nil {
 			return nil, err
@@ -163,9 +165,23 @@ func (s *State) AddBlock(block Block) (common.Hash, error) {
 	if err != nil {
 		return common.Hash{}, err
 	}
-	if err = s.db.Put(blockHash.Bytes(), blockFsJson); err != nil {
+
+	blockKey := append([]byte(INDEX_BLOCK_HASH), blockHash.Bytes()...)
+	blockNumberIndex := append([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(block.Header.Number)...)
+
+	// add block and index to db
+	batch := s.db.NewBatch()
+	if err = batch.Put(blockNumberIndex, blockHash.Bytes()); err != nil {
 		return common.Hash{}, err
 	}
+
+	if err = batch.Put(blockKey, blockFsJson); err != nil {
+		return common.Hash{}, err
+	}
+	if err = batch.Write(); err != nil {
+		return common.Hash{}, err
+	}
+
 	log.Println("Block added", blockHash)
 
 	// Update the balances, block & hash to the current one
@@ -206,7 +222,8 @@ func (s *State) Copy() State {
 }
 
 func (s *State) GetBlock(blockHash common.Hash) (BlockFS, error) {
-	content, err := s.db.Get(blockHash.Bytes())
+	key := append([]byte(INDEX_BLOCK_HASH), blockHash.Bytes()...)
+	content, err := s.db.Get(key)
 	if err != nil {
 		return BlockFS{}, err
 	}
@@ -217,4 +234,10 @@ func (s *State) GetBlock(blockHash common.Hash) (BlockFS, error) {
 		return BlockFS{}, err
 	}
 	return *blockFS, nil
+}
+
+func (s *State) GetBlockWithHashBytes(hashBytes []byte) (BlockFS, error) {
+	var h common.Hash
+	h.SetBytes(hashBytes)
+	return s.GetBlock(h)
 }

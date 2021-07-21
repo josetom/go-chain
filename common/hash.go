@@ -22,13 +22,13 @@ func (h Hash) MarshalText() ([]byte, error) {
 // UnmarshalText parses a hash in hex syntax.
 func (h *Hash) UnmarshalText(input []byte) error {
 	result, err := UnmarshalUtil(input)
-	h.setBytes(result)
+	h.SetBytes(result)
 	return err
 }
 
 // SetBytes sets the address to the value of b.
 // If b is larger than len(a), b will be cropped from the left.
-func (h *Hash) setBytes(b []byte) {
+func (h *Hash) SetBytes(b []byte) {
 	if len(b) > HashLength {
 		b = b[len(b)-HashLength:]
 	}

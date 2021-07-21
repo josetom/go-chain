@@ -45,7 +45,7 @@ func TestSetBytes(t *testing.T) {
 	// setting a dummy prefix
 	ba := make([]byte, HashLength+2)
 	copy(ba, []byte("as"))
-	h1.setBytes(ba)
+	h1.SetBytes(ba)
 
 	if !h1.Equal(h3) {
 		t.Error(h1, h3)

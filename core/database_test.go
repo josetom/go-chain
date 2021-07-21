@@ -17,9 +17,11 @@ func TestGetBlocksAfter(t *testing.T) {
 
 	blocksFrom0, err := state.GetBlocksAfter(common.Hash{})
 	if len(blocksFrom0) != 2 || err != nil {
+		t.Fail()
+	} else {
 		hash, err := blocksFrom0[0].Hash()
 		if err != nil || hash.String() != test_helper.Hash_Block_0 {
-			t.Fail()
+			t.Error("hash", hash.String())
 		}
 	}
 
@@ -27,9 +29,11 @@ func TestGetBlocksAfter(t *testing.T) {
 	hash1.UnmarshalText([]byte(test_helper.Hash_Block_0))
 	blocksFrom1, err := state.GetBlocksAfter(hash1)
 	if len(blocksFrom1) != 1 || err != nil {
+		t.Fail()
+	} else {
 		hash, err := blocksFrom1[0].Hash()
 		if err != nil || hash.String() != test_helper.Hash_Block_1 {
-			t.Fail()
+			t.Error("hash", hash.String())
 		}
 	}
 

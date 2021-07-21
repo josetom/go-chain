@@ -99,6 +99,12 @@ func TestAddBlock(t *testing.T) {
 	if blockFS.Block.Transactions[0] != txn {
 		t.Fail()
 	}
+
+	cleanup := func() {
+		state.Close()
+		test_helper.DeleteTestDbFile(tempDbPath)
+	}
+	t.Cleanup(cleanup)
 }
 
 func TestNextBlockNumber(t *testing.T) {

@@ -1,4 +1,4 @@
-package dbtest
+package test_helper_db
 
 import (
 	"os"

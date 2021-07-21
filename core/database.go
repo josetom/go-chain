@@ -1,8 +1,6 @@
 package core
 
 import (
-	"encoding/json"
-
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/db/types"
 )
@@ -13,15 +11,23 @@ func (s *State) GetBlocksAfter(hash common.Hash) ([]Block, error) {
 	blocks := make([]Block, 0)
 
 	var iter types.Iterator
-	var blockFS BlockFS
+
 	if hash.Equal(common.Hash{}) {
-		iter = s.db.NewIterator(nil, nil)
+		iter = s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(1), nil)
 	} else {
-		iter = s.db.NewIterator(hash.Bytes(), nil)
-		iter.Next() // skip the current one and forward
+
+		blockFS, err := s.GetBlock(hash)
+		if err != nil {
+			return nil, err
+		}
+
+		iter = s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(blockFS.Block.Header.Number+1), nil)
 	}
 	for iter.Next() {
-		json.Unmarshal(iter.Value(), &blockFS)
+		blockFS, err := s.GetBlockWithHashBytes(iter.Value())
+		if err != nil {
+			return nil, err
+		}
 		blocks = append(blocks, blockFS.Block)
 	}
 

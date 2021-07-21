@@ -3,13 +3,13 @@ package db_test
 import (
 	"testing"
 
-	"github.com/josetom/go-chain/db/dbtest"
+	"github.com/josetom/go-chain/test_helper/test_helper_db"
 )
 
 func TestDatabase(t *testing.T) {
 
 	// new db
-	database := dbtest.NewTestDatabase(t)
+	database := test_helper_db.NewTestDatabase(t)
 
 	// put
 	err := database.Put([]byte("k1"), []byte("v1"))
