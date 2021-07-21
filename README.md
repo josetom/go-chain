@@ -16,6 +16,8 @@ A simple blockchain built with inspiration from geth
     - Sync
 - Wallets
 - LevelDB
+    - Stores the blocks against hash
+    - Has an index to point block number against hash. Iterator is run on this index
 ### Todo
 - Persist state
     - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
@@ -24,8 +26,6 @@ A simple blockchain built with inspiration from geth
 - Concurrency checks
 - Proof of stake
 - Misc items
-    - LevelDB
-        - iterator sort
     - Transactions
         - Block txn from zero address
         - Increment txn nonce for signer
