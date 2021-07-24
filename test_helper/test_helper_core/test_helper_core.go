@@ -6,7 +6,6 @@ import (
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
 	"github.com/josetom/go-chain/db"
-	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
 )
 
@@ -32,7 +31,7 @@ var state *core.State
 func GetTestState() (*core.State, error) {
 	if state == nil {
 		db.Config.Type = db.LEVEL_DB
-		fs.Config.DataDir = test_helper.GetTestDataDir()
+		test_helper.SetTestDataDirs()
 		s, err := core.LoadState()
 		if err != nil {
 			return nil, err

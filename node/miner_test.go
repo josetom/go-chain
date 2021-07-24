@@ -6,14 +6,13 @@ import (
 
 	"github.com/josetom/go-chain/core"
 	"github.com/josetom/go-chain/db"
-	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
 	"github.com/josetom/go-chain/test_helper/test_helper_core"
 )
 
 func TestMine(t *testing.T) {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	tempDbPath := test_helper.CreateAndGetTestDbFile()
 	core.Config.State.DbFile = tempDbPath
 

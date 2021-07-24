@@ -18,7 +18,7 @@ func BytesToHash(b []byte) Hash {
 // removes the 0x from the hex string if prefix is present
 // if odd number of characters, prefix hex string with 0
 func Hex2Bytes(s string) []byte {
-	if has0xPrefix(s) {
+	if Has0xPrefix(s) {
 		s = s[2:]
 	}
 	if len(s)%2 == 1 {
@@ -28,7 +28,7 @@ func Hex2Bytes(s string) []byte {
 }
 
 // checks if a string is of the format 0xSomething
-func has0xPrefix(s string) bool {
+func Has0xPrefix(s string) bool {
 	return len(s) > 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')
 }
 
@@ -57,7 +57,7 @@ func UnmarshalUtil(b []byte) ([]byte, error) {
 	if len(b) == 0 {
 		return nil, nil
 	}
-	if bytesHave0xPrefix(b) {
+	if BytesHave0xPrefix(b) {
 		b = b[2:]
 	}
 	result := make([]byte, hex.DecodedLen(len(b)))
@@ -65,7 +65,7 @@ func UnmarshalUtil(b []byte) ([]byte, error) {
 	return result, nil
 }
 
-func bytesHave0xPrefix(b []byte) bool {
+func BytesHave0xPrefix(b []byte) bool {
 	return len(b) >= 2 && b[0] == '0' && (b[1] == 'x' || b[1] == 'X')
 }
 

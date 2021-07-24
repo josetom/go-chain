@@ -6,14 +6,13 @@ import (
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
 	"github.com/josetom/go-chain/db"
-	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
 	"github.com/josetom/go-chain/test_helper/test_helper_core"
 )
 
 func TestLoadStateValid(t *testing.T) {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	state, err := test_helper_core.GetTestState()
 	if err != nil {
 		t.Error(err)
@@ -29,7 +28,7 @@ func TestLoadStateValid(t *testing.T) {
 
 func TestAddTransactionSuccess(t *testing.T) {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	state, err := test_helper_core.GetTestState()
 	if err != nil {
 		t.Error(err)
@@ -58,7 +57,7 @@ func TestAddTransactionInsufficientBalance(t *testing.T) {
 
 func TestAddBlock(t *testing.T) {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	tempDbPath := test_helper.CreateAndGetTestDbFile()
 	core.Config.State.DbFile = tempDbPath
 
