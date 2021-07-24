@@ -37,6 +37,8 @@ https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/6874
         - Increment txn nonce for signer
     - Wallet
         - Import private key
+    - Signer
+        - Implement better way to sign the transactions
     - Node
         - Node Version
         - Sync should happen only after the blocks are synced first time

@@ -32,12 +32,12 @@ func TestAddTransactionSuccess(t *testing.T) {
 	fs.Config.DataDir = test_helper.GetTestDataDir()
 	state, err := test_helper_core.GetTestState()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	txn := test_helper_core.GetTestTxn()
 	err = state.AddTransaction(txn)
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 	cleanup := func() {
 		state.Close()
@@ -71,15 +71,13 @@ func TestAddBlock(t *testing.T) {
 
 	validBlock, err := test_helper_core.GetTestBlock(true, state, []core.Transaction{txn})
 	if err != nil {
-		print(err)
-		t.Fail()
+		t.Error(err)
 	}
 
 	blockHash, err := state.AddBlock(validBlock)
 
 	if err != nil {
-		print(err)
-		t.Fail()
+		t.Error(err)
 	}
 
 	blockFS, err := state.GetBlock(blockHash)
@@ -89,11 +87,11 @@ func TestAddBlock(t *testing.T) {
 
 	readBlockHash, err := blockFS.Block.Hash()
 	if err != nil {
-		t.Fail()
+		t.Error(err)
 	}
 
 	if blockHash.String() != readBlockHash.String() {
-		t.Fail()
+		t.Error(blockHash)
 	}
 
 	if blockFS.Block.Transactions[0] != txn {

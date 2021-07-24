@@ -1,8 +1,8 @@
-name: go-chain CI
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, build ]
   pull_request:
     branches: [ main ]
 
