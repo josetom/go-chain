@@ -27,9 +27,14 @@ func GetTestTxn() core.Transaction {
 }
 
 var state *core.State
+var isInSetup bool
 
 func GetTestState() (*core.State, error) {
+	for isInSetup {
+		time.Sleep(1 * time.Second)
+	}
 	if state == nil {
+		isInSetup = true
 		db.Config.Type = db.LEVEL_DB
 		test_helper.SetTestDataDirs()
 		s, err := core.LoadState()
@@ -37,6 +42,7 @@ func GetTestState() (*core.State, error) {
 			return nil, err
 		}
 		state = s
+		isInSetup = false
 	}
 	return state, nil
 }
