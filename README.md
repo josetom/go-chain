@@ -1,6 +1,12 @@
 # Go Chain !
 A simple blockchain built with inspiration from geth
 
+[![API Reference](
+https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f676f6c616e672f6764646f3f7374617475732e737667
+)](https://pkg.go.dev/github.com/josetom/go-chain?tab=doc)
+[![Go Report Card](https://goreportcard.com/badge/github.com/josetom/go-chain)](https://goreportcard.com/report/github.com/josetom/go-chain)
+[![CI](https://github.com/josetom/go-chain/actions/workflows/ci.yml/badge.svg)](https://github.com/josetom/go-chain/actions/workflows/ci.yml)
+
 ## Story 
 ### Supported
 - Genesis
@@ -31,6 +37,8 @@ A simple blockchain built with inspiration from geth
         - Increment txn nonce for signer
     - Wallet
         - Import private key
+    - Signer
+        - Implement better way to sign the transactions
     - Node
         - Node Version
         - Sync should happen only after the blocks are synced first time

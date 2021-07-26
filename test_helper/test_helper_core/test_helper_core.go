@@ -6,7 +6,6 @@ import (
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
 	"github.com/josetom/go-chain/db"
-	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
 )
 
@@ -28,16 +27,22 @@ func GetTestTxn() core.Transaction {
 }
 
 var state *core.State
+var isInSetup bool
 
 func GetTestState() (*core.State, error) {
+	for isInSetup {
+		time.Sleep(1 * time.Second)
+	}
 	if state == nil {
+		isInSetup = true
 		db.Config.Type = db.LEVEL_DB
-		fs.Config.DataDir = test_helper.GetTestDataDir()
+		test_helper.SetTestDataDirs()
 		s, err := core.LoadState()
 		if err != nil {
 			return nil, err
 		}
 		state = s
+		isInSetup = false
 	}
 	return state, nil
 }

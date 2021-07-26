@@ -5,7 +5,15 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/josetom/go-chain/fs"
+	"github.com/josetom/go-chain/wallet"
 )
+
+func SetTestDataDirs() {
+	fs.Config.DataDir = GetTestDataDir()
+	wallet.Config.DataDir = GetTestDataDir()
+}
 
 func GetTestDataDir() string {
 	cwd, _ := os.Getwd()

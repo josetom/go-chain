@@ -9,6 +9,7 @@ import (
 )
 
 func TestBlockHash(t *testing.T) {
+	test_helper.SetTestDataDirs()
 	txn := getTestTxn()
 	block := NewBlock(
 		common.Hash{},
@@ -27,7 +28,7 @@ func TestBlockHash(t *testing.T) {
 }
 
 func TestIsBlockHashValid(t *testing.T) {
-
+	test_helper.SetTestDataDirs()
 	// invalid block
 	block1, err := getTestBlock(false, &State{}, []Transaction{})
 	if err != nil {

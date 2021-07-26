@@ -117,3 +117,11 @@ func (n *Node) registerHandlers() *http.ServeMux {
 
 	return handler
 }
+
+func (node *Node) AddTransaction(txn core.Transaction) error {
+	if err := node.miner.pendingState.ValidateTxn(txn); err != nil {
+		return err
+	}
+	node.miner.txnsCh <- txn
+	return nil
+}

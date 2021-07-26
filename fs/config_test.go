@@ -1,19 +1,21 @@
-package fs
+package fs_test
 
 import (
 	"testing"
+
+	"github.com/josetom/go-chain/fs"
 )
 
 func TestSetConfig(t *testing.T) {
-	testConfig := FsConfig{
-		DataDir: Defaults().DataDir,
+	testConfig := fs.FsConfig{
+		DataDir: fs.Defaults().DataDir,
 	}
-	SetConfig(testConfig)
-	if Config.DataDir != Defaults().DataDir {
+	fs.SetConfig(testConfig)
+	if fs.Config.DataDir != fs.Defaults().DataDir {
 		t.Fail()
 	}
 	cleanup := func() {
-		Config = Defaults()
+		fs.Config = fs.Defaults()
 	}
 	t.Cleanup(cleanup)
 }

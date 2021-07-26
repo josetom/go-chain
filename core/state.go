@@ -111,8 +111,7 @@ func (s *State) applyBlock(b Block) error {
 	return nil
 }
 
-// Validate current balances and update the balances
-func (s *State) applyTransaction(tx Transaction) error {
+func (s *State) ValidateTxn(tx Transaction) error {
 	isAuthentic, err := tx.IsAuthentic()
 	if !isAuthentic {
 		return fmt.Errorf("not_authentic")
@@ -122,6 +121,14 @@ func (s *State) applyTransaction(tx Transaction) error {
 	}
 	if s.Balances[tx.From()] < tx.Cost() {
 		return fmt.Errorf("insufficient_balance")
+	}
+	return nil
+}
+
+// Validate current balances and update the balances
+func (s *State) applyTransaction(tx Transaction) error {
+	if err := s.ValidateTxn(tx); err != nil {
+		return err
 	}
 	s.Balances[tx.From()] -= tx.Cost()
 	s.Balances[tx.To()] += tx.Value()

@@ -39,7 +39,7 @@ func (n *Node) doSync() {
 			continue
 		}
 
-		log.Printf("Searching for new Peers and their Blocks and Peers: '%s'\n", peer.Host)
+		// log.Printf("Searching for new Peers and their Blocks and Peers: '%s'\n", peer.Host)
 
 		status, err := queryPeerStatus(peer)
 		if err != nil {
@@ -94,8 +94,8 @@ func (n *Node) syncBlocks(peer PeerNode, status NodeStatusRes) error {
 
 	newBlocksCount := status.Number - localBlockNumber
 	if localBlockNumber == 0 && status.Number == 0 {
-		log.Printf("Found genesis new blocks from Peer %s\n", peer.Host)
-	} else {
+		// log.Printf("Found genesis new blocks from Peer %s\n", peer.Host)
+	} else if newBlocksCount > 0 {
 		log.Printf("Found %d new blocks from Peer %s\n", newBlocksCount, peer.Host)
 	}
 
@@ -181,7 +181,7 @@ func queryPeerStatus(peer PeerNode) (NodeStatusRes, error) {
 	url := fmt.Sprintf("%s%s", peer.Host, RequestNodeStatus)
 	res, err := httpClient.Get(url)
 	if err != nil {
-		return NodeStatusRes{}, err
+		return NodeStatusRes{}, fmt.Errorf("unable to connect to %s", peer.Host)
 	}
 
 	statusRes := NodeStatusRes{}

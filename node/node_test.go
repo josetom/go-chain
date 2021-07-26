@@ -1,7 +1,7 @@
 package node
 
 // func TestRun(t *testing.T) {
-// 	fs.Config.DataDir = test_helper.GetTestDataDir()
+// 	test_helper.SetTestDataDirs()
 // 	node := NewNode()
 // 	ctx, _ := context.WithTimeout(context.Background(), time.Second*1)
 // 	err := node.Run(ctx)

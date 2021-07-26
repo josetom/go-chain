@@ -9,7 +9,6 @@ import (
 	"github.com/josetom/go-chain/common"
 	"github.com/josetom/go-chain/core"
 	"github.com/josetom/go-chain/db"
-	"github.com/josetom/go-chain/fs"
 	"github.com/josetom/go-chain/test_helper"
 	"github.com/josetom/go-chain/test_helper/test_helper_core"
 )
@@ -45,7 +44,7 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 
 func createDummmyNodeAndLoadState() Node {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	core.Config.State.DbFile = core.Defaults().State.DbFile
 
 	node := NewNode()
@@ -77,7 +76,7 @@ func getDummyClient() *http.Client {
 
 func testFetchBlocksFromPeer(t *testing.T) {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	tempDbPath := test_helper.CreateAndGetTestDbFile()
 	core.Config.State.DbFile = tempDbPath
 
@@ -113,7 +112,7 @@ func testFetchBlocksFromPeer(t *testing.T) {
 
 func testQueryPeerStatus(t *testing.T) {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	tempDbPath := test_helper.CreateAndGetTestDbFile()
 	core.Config.State.DbFile = tempDbPath
 
@@ -143,7 +142,7 @@ func testQueryPeerStatus(t *testing.T) {
 
 func testJoinKnownPeer(t *testing.T) {
 	db.Config.Type = db.LEVEL_DB
-	fs.Config.DataDir = test_helper.GetTestDataDir()
+	test_helper.SetTestDataDirs()
 	tempDbPath := test_helper.CreateAndGetTestDbFile()
 	core.Config.State.DbFile = tempDbPath
 
