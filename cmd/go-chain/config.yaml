@@ -14,10 +14,10 @@ node:
     address: "0x38c4ce5b96044e7ddd9ad95947178ed3436a4539"
   isBootstrap: false
   bootstrapNodes:
-    -  host: "http://127.0.0.1:8600"
+    -  host: "http://54.160.50.208:8600"
   http:
     protocol: "http"
-    host: "http://127.0.0.1:8600"
+    host: "http://9488dda31f9d.ngrok.io"
     port: 8600
 wallet:
   datadir: "~/pet-project/blockchain/.database"

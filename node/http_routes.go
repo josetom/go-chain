@@ -83,12 +83,7 @@ func transactionsHandler(w http.ResponseWriter, r *http.Request, node *Node) {
 		)
 		// TODO : validate txn for balance and throw error
 
-		node.miner.txnsCh <- txn
-
-		if err != nil {
-			writeErrRes(w, err)
-			return
-		}
+		err = node.AddTransaction(txn)
 
 		if err != nil {
 			writeErrRes(w, err)
