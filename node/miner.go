@@ -75,8 +75,9 @@ func (m *Miner) mainLoop(ctx context.Context) {
 		case block := <-m.syncBlockCh:
 			if m.isMining {
 				stopCurrentMining()
-				m.removeMinedTxns(block)
 			}
+			m.removeMinedTxns(block)
+			m.resetPendingState()
 
 		case <-ctx.Done():
 			ticker.Stop()
@@ -127,8 +128,7 @@ func (m *Miner) mine(ctx context.Context) (core.Block, error) {
 		return core.Block{}, err
 	}
 
-	pendingState := m.state.Copy()
-	m.pendingState = &pendingState
+	m.resetPendingState()
 
 	return block, err
 }
@@ -159,4 +159,9 @@ func (m *Miner) mineBlockHelper(ctx context.Context, pendingBlock core.Block) (c
 
 func (m *Miner) mineBlock(ctx context.Context, pendingBlock core.Block) (core.Block, error) {
 	return m.mineBlockHelper(ctx, pendingBlock)
+}
+
+func (m *Miner) resetPendingState() {
+	pendingState := m.state.Copy()
+	m.pendingState = &pendingState
 }
