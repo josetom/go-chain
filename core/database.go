@@ -11,10 +11,9 @@ func (s *State) GetBlocksAfter(hash common.Hash) ([]Block, error) {
 	blocks := make([]Block, 0)
 
 	var iter types.Iterator
-	geneisHash, _ := genesisContent.Hash() // ignoring the error here since it would have failed at start itself otherwise
 
-	if hash.Equal(common.Hash{}) || hash.Equal(geneisHash) {
-		iter = s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(1), nil)
+	if hash.Equal(common.Hash{}) {
+		iter = s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(0), nil)
 	} else {
 
 		blockFS, err := s.GetBlock(hash)

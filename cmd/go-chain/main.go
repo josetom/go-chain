@@ -26,6 +26,7 @@ func main() {
 
 	cmd.AddCommand(versionCmd)
 	cmd.AddCommand(runCmd)
+	cmd.AddCommand(initCmd)
 	cmd.AddCommand(configCmd)
 	cmd.AddCommand(balancesCmd())
 	cmd.AddCommand(txCmd())

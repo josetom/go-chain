@@ -57,6 +57,7 @@ func GetTestBlock(isValid bool, state *core.State, txns []core.Transaction) (cor
 		core.MINING_ALGO_POW,
 		uint64(core.Config.Block.Reward),
 		txns,
+		nil,
 	)
 
 	if isValid {
