@@ -3,7 +3,7 @@ package core
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	"time"
 
 	"github.com/josetom/go-chain/common"
 )
@@ -18,22 +18,43 @@ type Genesis struct {
 	Balances  map[common.Address]uint `json:"balances"`
 }
 
-var genesisContent *Genesis
-
-func loadGenesis() (*Genesis, error) {
-	genesisFilePath := GetGenesisFilePath()
-	content, err := ioutil.ReadFile(genesisFilePath)
+func InitGenesis() error {
+	// Create Gensis file if it doesn't exist
+	err := initializeGenesisFile()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = json.Unmarshal(content, &genesisContent)
+	genesisData, err := loadGenesisDataFromFile()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	log.Println("Genesis file loaded")
 
-	return genesisContent, nil
+	state, err := NewState()
+	if err != nil {
+		return err
+	}
+
+	err = state.applyGenesis(genesisData)
+	if err != nil {
+		return err
+	}
+
+	block := NewBlock(
+		common.Hash{},
+		state.NextBlockNumber(),
+		uint64(time.Now().UnixNano()),
+		0,
+		common.Address{},
+		"genesis",
+		0,
+		[]Transaction{},
+		genesisData,
+	)
+
+	_, err = state.AddBlock(block)
+
+	return err
 }
 
 func (g Genesis) Hash() (common.Hash, error) {
@@ -42,4 +63,14 @@ func (g Genesis) Hash() (common.Hash, error) {
 		return common.Hash{}, err
 	}
 	return common.BytesToHash(blockJson), nil
+}
+
+func loadGenesisDataFromFile() ([]byte, error) {
+	genesisFilePath := GetGenesisFilePath()
+	content, err := ioutil.ReadFile(genesisFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return content, nil
 }

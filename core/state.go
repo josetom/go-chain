@@ -19,43 +19,37 @@ type State struct {
 	latestBlockHash common.Hash
 }
 
+func NewState() (*State, error) {
+	balances := make(map[common.Address]uint)
+
+	database, err := db.NewDatabase(GetBlocksDbPath())
+	if err != nil {
+		return nil, err
+	}
+
+	state := &State{
+		Balances: balances,
+		db:       database,
+	}
+
+	return state, nil
+}
+
 // 1. Initializes empty state
 // 2. Load Genesis block
 // 3. Loads the state from local db
 func LoadState() (*State, error) {
-	genesisContent, err := loadGenesis()
+
+	state, err := NewState()
 	if err != nil {
 		return nil, err
 	}
-	genesisHash, err := genesisContent.Hash()
-	if err != nil {
-		return nil, err
-	}
-
-	balances := make(map[common.Address]uint)
-
-	for address, balance := range genesisContent.Balances {
-		balances[address] = balance
-	}
-
-	state := &State{
-		Balances:        balances,
-		latestBlock:     Block{},
-		latestBlockHash: genesisHash,
-	}
-
 	return state.loadStateFromDisk()
 }
 
 // Load blocks from local db and validate
 func (s *State) loadStateFromDisk() (*State, error) {
-	database, err := db.NewDatabase(GetBlocksDbPath())
-	if err != nil {
-		return nil, err
-	}
-	s.db = database
-
-	iter := s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(1), nil)
+	iter := s.db.NewIterator([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(0), nil)
 
 	for iter.Next() {
 		blockFS, err := s.GetBlockWithHashBytes(iter.Value())
@@ -98,15 +92,20 @@ func (s *State) applyBlock(b Block) error {
 	}
 
 	if !isBlockValid {
-		return fmt.Errorf("invalid block hash %x", blockHash)
+		return fmt.Errorf("invalid block hash %s", blockHash)
 	}
 
-	err = s.applyTransactions(b.Transactions)
-	if err != nil {
-		return err
-	}
+	if b.Header.Number == 0 {
+		s.applyGenesis(b.Data)
 
-	s.Balances[b.Header.Miner] += uint(b.Header.Reward)
+	} else {
+
+		err = s.applyTransactions(b.Transactions)
+		if err != nil {
+			return err
+		}
+		s.addBalance(b.Header.Miner, uint(b.Header.Reward))
+	}
 
 	return nil
 }
@@ -130,8 +129,11 @@ func (s *State) applyTransaction(tx Transaction) error {
 	if err := s.ValidateTxn(tx); err != nil {
 		return err
 	}
-	s.Balances[tx.From()] -= tx.Cost()
-	s.Balances[tx.To()] += tx.Value()
+	err := s.subBalance(tx.From(), tx.Cost())
+	if err != nil {
+		return err
+	}
+	s.addBalance(tx.To(), tx.Value())
 
 	return nil
 }
@@ -212,6 +214,10 @@ func (s *State) LatestBlock() Block {
 }
 
 func (s *State) NextBlockNumber() uint64 {
+	if s.latestBlockHash.Equal(common.Hash{}) {
+		// Genesis block
+		return 0
+	}
 	return s.latestBlock.Header.Number + 1
 }
 
@@ -247,4 +253,30 @@ func (s *State) GetBlockWithHashBytes(hashBytes []byte) (BlockFS, error) {
 	var h common.Hash
 	h.SetBytes(hashBytes)
 	return s.GetBlock(h)
+}
+
+func (s *State) applyGenesis(content []byte) error {
+	var genesisContent Genesis
+	err := json.Unmarshal(content, &genesisContent)
+	if err != nil {
+		return err
+	}
+
+	for address, balance := range genesisContent.Balances {
+		s.addBalance(address, balance)
+	}
+
+	return nil
+}
+
+func (s *State) addBalance(address common.Address, balance uint) {
+	s.Balances[address] += balance
+}
+
+func (s *State) subBalance(address common.Address, balance uint) error {
+	if s.Balances[address] < balance {
+		return fmt.Errorf("insufficient_balance")
+	}
+	s.Balances[address] -= balance
+	return nil
 }

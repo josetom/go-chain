@@ -38,13 +38,14 @@ func getTestTxn() Transaction {
 func getTestBlock(isValid bool, state *State, txns []Transaction) (Block, error) {
 	block := NewBlock(
 		state.latestBlockHash,
-		state.NextBlockNumber(),
+		1,
 		uint64(time.Time{}.UnixNano()),
 		0,
 		common.NewAddress(""), // miner.Config.Address
 		MINING_ALGO_POW,
 		uint64(Config.Block.Reward),
 		txns,
+		nil,
 	)
 
 	if isValid {

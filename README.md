@@ -10,6 +10,8 @@ https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/6874
 ## Story 
 ### Supported
 - Genesis
+    - Initializes blockchain from genesis.json
+    - creates block 0 from genesis.json data
 - State
 - Transactions
 - Hashing
@@ -25,12 +27,12 @@ https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/6874
     - Stores the blocks against hash
     - Has an index to point block number against hash. Iterator is run on this index
 ### Todo
-- Persist state
-    - TBD : Txn Data should not be publicly accessible. Make it public and add a different struct to handle persistance
 - Websockets
 - GRPC
 - Concurrency checks
 - Proof of stake
+- Incoming longer block
+- Persist State
 - Misc items
     - Transactions
         - Block txn from zero address
@@ -42,6 +44,8 @@ https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/6874
     - Node
         - Node Version
         - Sync should happen only after the blocks are synced first time
+    - Miner
+        - Isolate miner from regular nodes
 - ...??
 - Fix TODO comments
 # Development

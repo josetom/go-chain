@@ -20,6 +20,7 @@ func TestBlockHash(t *testing.T) {
 		MINING_ALGO_POW,
 		uint64(Config.Block.Reward),
 		[]Transaction{txn},
+		nil,
 	)
 	blockHash, err := block.Hash()
 	if blockHash.String() != test_helper.Hash_Block_100_Reward || err != nil {

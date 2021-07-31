@@ -17,7 +17,7 @@ func TestLoadStateValid(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if state.Balances[common.NewAddress(test_helper.Test_Address_2)] != 200 {
+	if state.Balances[common.NewAddress(test_helper.Test_Address_2)] != 100 {
 		t.Fail()
 	}
 	cleanup := func() {
@@ -108,7 +108,7 @@ func TestNextBlockNumber(t *testing.T) {
 	state := &core.State{
 		Balances: make(map[common.Address]uint),
 	}
-	if state.NextBlockNumber() != 1 {
+	if state.NextBlockNumber() != 0 {
 		t.Fail()
 	}
 }

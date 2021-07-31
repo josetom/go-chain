@@ -23,11 +23,11 @@ func InitFS() error {
 		return err
 	}
 
-	// Create Gensis file if it doesn't exist
-	err = initializeGenesisFile()
-	if err != nil {
-		return err
-	}
+	// // Create Gensis file if it doesn't exist
+	// err = initializeGenesisFile()
+	// if err != nil {
+	// 	return err
+	// }
 
 	// Initialize empty block db if it doesn't exist
 	err = initializeBlockDb()

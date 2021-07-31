@@ -5,7 +5,7 @@ import "github.com/josetom/go-chain/common"
 func getDefaultBootstrapNodes() []BootstrapNodeConfig {
 	var bootstrapNodes = make([]BootstrapNodeConfig, 0)
 	bnc := BootstrapNodeConfig{
-		Host: "http://127.0.0.1:8600",
+		Host: "http://testnet.unigate.network",
 	}
 	bootstrapNodes = append(bootstrapNodes, bnc)
 	return bootstrapNodes

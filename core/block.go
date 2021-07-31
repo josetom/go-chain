@@ -11,6 +11,7 @@ import (
 type Block struct {
 	Header       BlockHeader   `json:"header"`
 	Transactions []Transaction `json:"transactions"`
+	Data         []byte        `json:"data,omitempty"`
 }
 
 type BlockHeader struct {
@@ -38,6 +39,7 @@ func NewBlock(
 	miningAlgo string,
 	reward uint64,
 	transactions []Transaction,
+	data []byte,
 ) Block {
 	return Block{
 		BlockHeader{
@@ -51,6 +53,7 @@ func NewBlock(
 			Reward:           reward,
 		},
 		transactions,
+		data,
 	}
 }
 
@@ -70,6 +73,9 @@ func (b Block) IsBlockHashValid() (bool, error) {
 	hash, err := b.Hash()
 	if err != nil {
 		return false, err
+	}
+	if b.Header.Number == 0 { // genesis block
+		return true, nil
 	}
 	fmt_s := "%0" + fmt.Sprint(b.Header.MiningComplexity) + "d"
 	s := fmt.Sprintf(fmt_s, 0) // if complexity = 5; generates "00000"

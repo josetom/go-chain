@@ -94,7 +94,7 @@ func (n *Node) syncBlocks(peer PeerNode, status NodeStatusRes) error {
 
 	newBlocksCount := status.Number - localBlockNumber
 	if localBlockNumber == 0 && status.Number == 0 {
-		// log.Printf("Found genesis new blocks from Peer %s\n", peer.Host)
+		log.Printf("Found genesis block from Peer %s\n", peer.Host)
 	} else if newBlocksCount > 0 {
 		log.Printf("Found %d new blocks from Peer %s\n", newBlocksCount, peer.Host)
 	}

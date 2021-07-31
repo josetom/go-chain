@@ -112,6 +112,7 @@ func (m *Miner) mine(ctx context.Context) (core.Block, error) {
 		core.MINING_ALGO_POW,
 		uint64(core.Config.Block.Reward),
 		txnArr,
+		nil,
 	)
 
 	block, err := m.mineBlock(ctx, pendingBlock)
