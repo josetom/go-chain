@@ -15,6 +15,7 @@ node:
   isBootstrap: false
   bootstrapNodes:
     -  host: "http://testnet.unigate.network"
+    # -  host: "http://localhost:8600"
   http:
     protocol: "http"
     host: "http://9488dda31f9d.ngrok.io"

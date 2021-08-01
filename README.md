@@ -13,12 +13,14 @@ https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/6874
     - Initializes blockchain from genesis.json
     - creates block 0 from genesis.json data
 - State
+    - Holds the account balances
 - Transactions
 - Hashing
 - Blocks
     - Validate blocks
     - Mine blocks
-- Http Server
+- Server
+    - Http
 - Node
     - Peers
     - Sync
@@ -26,28 +28,35 @@ https://camo.githubusercontent.com/915b7be44ada53c290eb157634330494ebe3e30a/6874
 - LevelDB
     - Stores the blocks against hash
     - Has an index to point block number against hash. Iterator is run on this index
+- Consensus
+    - Proof of work
 ### Todo
-- Websockets
-- GRPC
-- Concurrency checks
-- Proof of stake
-- Incoming longer block
-- Persist State
-- Misc items
-    - Transactions
-        - Block txn from zero address
-        - Increment txn nonce for signer
-    - Wallet
-        - Import private key
-    - Signer
-        - Implement better way to sign the transactions
-    - Node
-        - Node Version
-        - Sync should happen only after the blocks are synced first time
-    - Miner
-        - Isolate miner from regular nodes
+- Server
+    - Websockets
+    - GRPC
+- State
+    - Persist State
+    - Incoming longer block
+    - Isolate block, index databases
+- Consensus
+    - Proof of stake
+- Transactions
+    - Block txn from zero address
+    - Increment txn nonce for signer
+    - Txns should be atomic
+- Wallet
+    - Import private key
+- Signer
+    - Implement better way to sign the transactions
+- Node
+    - Node Version
+    - Sync should happen only after the blocks are synced first time
+- Miner
+    - Isolate miner from regular nodes
+- Smart contracts
+    - Wasm ?
 - ...??
-- Fix TODO comments
+    - Fix TODO comments
 # Development
 ```sh
 go build ./cmd/go-chain/...

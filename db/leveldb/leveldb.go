@@ -1,6 +1,7 @@
 package leveldb
 
 import (
+	"github.com/josetom/go-chain/db/errors"
 	"github.com/josetom/go-chain/db/types"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
@@ -12,6 +13,8 @@ type levelDB struct {
 	dbPath string
 	db     *leveldb.DB
 }
+
+var levelDbNotFoundErrorMessage = "leveldb: not found"
 
 func NewLevelDB(dbPath string) (types.Database, error) {
 	db, err := leveldb.OpenFile(dbPath, nil)
@@ -33,6 +36,9 @@ func (db *levelDB) Has(key []byte) (bool, error) {
 func (db *levelDB) Get(key []byte) ([]byte, error) {
 	dat, err := db.db.Get(key, nil)
 	if err != nil {
+		if err.Error() == levelDbNotFoundErrorMessage {
+			return nil, errors.NotFoundError
+		}
 		return nil, err
 	}
 	return dat, nil

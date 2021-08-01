@@ -255,6 +255,15 @@ func (s *State) GetBlockWithHashBytes(hashBytes []byte) (BlockFS, error) {
 	return s.GetBlock(h)
 }
 
+func (s *State) GetBlockWithNumber(blockNumber uint64) (BlockFS, error) {
+	key := append([]byte(INDEX_BLOCK_NUMBER), getBlockNumberAsIndexBytes(blockNumber)...)
+	hashBytes, err := s.db.Get(key)
+	if err != nil {
+		return BlockFS{}, err
+	}
+	return s.GetBlockWithHashBytes(hashBytes)
+}
+
 func (s *State) applyGenesis(content []byte) error {
 	var genesisContent Genesis
 	err := json.Unmarshal(content, &genesisContent)
